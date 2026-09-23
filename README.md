@@ -35,3 +35,7 @@ En ordenador, arrastra la barra fina que separa la panorámica del panel de text
 ## Índice de la columna izquierda
 
 El índice agrupa los puntos en Ámbitos, I Exterior, II Interior (planta baja, planta primera y falsa) y Exterior. Los títulos y las aclaraciones entre corchetes vienen de `datos/fichas.js`; los encabezados de grupo están definidos en `app.js`. Si ya has personalizado textos en un `fichas.js` anterior, guarda una copia antes de reemplazarlo.
+
+## Logotipo de cabecera
+
+El logotipo blanco de la Diputación Provincial de Zaragoza está en `assets/diputacion-zaragoza.png`. Al actualizar desde este paquete, sube también la carpeta `assets` completa, además del `index.html` y `styles.css`. Su tamaño se controla en `styles.css` bajo «Logotipo blanco».
