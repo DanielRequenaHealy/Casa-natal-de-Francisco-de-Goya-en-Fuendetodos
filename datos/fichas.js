@@ -2,7 +2,7 @@ window.FICHAS = [
   {
     "numero": 0,
     "titulo": "La casa natal de Francisco de Goya y Lucientes",
-    "panorama": "panoramas/00.jpg",
+    "panorama": "panoramas/00.png",
     "bloques": [
       {
         "tipo": "subtitulo",
