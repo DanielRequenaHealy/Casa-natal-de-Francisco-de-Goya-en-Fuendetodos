@@ -12,18 +12,22 @@ IMPORTANTE: GitHub Pages publica el contenido del sitio en internet; incluso un 
 
 ## Añadir panorámicas
 
-Exporta tus 14 panoramas 360º equirectangulares desde Twinmotion como JPG y guárdalos en `panoramas/01.jpg`, `panoramas/02.jpg`, ... `panoramas/14.jpg`. Se recomienda una proporción 2:1. En `datos/fichas.js` puedes cambiar en cada punto el campo `panorama` si los archivos tienen otro nombre. Mientras falten las imágenes, aparecerá el aviso «Panorámica pendiente».
+Exporta tus 15 panoramas 360º equirectangulares desde Twinmotion como JPG y guárdalos en `panoramas/00.jpg`, `panoramas/01.jpg`, ... `panoramas/14.jpg`. Se recomienda una proporción 2:1. En `datos/fichas.js` puedes cambiar en cada punto el campo `panorama` si los archivos tienen otro nombre o si exportas en PNG (por ejemplo, `panoramas/00.png`). Mientras falten las imágenes, aparecerá el aviso «Panorámica pendiente».
 
 ## Editar texto e imágenes
 
-Abre `datos/fichas.js` con un editor de texto. En cada uno de los 14 puntos modifica `titulo`, `panorama` y `bloques`. El texto completo de «Alcoba suroeste» está copiado como plantilla en los 14 puntos; el punto 09 ya tiene ese título.
+Abre `datos/fichas.js` con un editor de texto. En cada uno de los 15 puntos modifica `titulo`, `panorama` y `bloques`. El texto completo de «Alcoba suroeste» está copiado como plantilla en los 15 puntos; el punto 09 ya tiene ese título.
 
 - Texto: `{"tipo":"texto","texto":"Explicación con [A] y [1]"}`.
 - Título: `{"tipo":"subtitulo","texto":"Planos"}`.
 - Foto: `{"tipo":"imagen","referencia":"1","codigo":"ACGF_322_c_1","url":"fotos/acta.jpg","pie":"Descripción y crédito"}`.
 
-Añade los JPG de las fichas a la carpeta que indiques en `url`; si queda vacío aparece un marcador. Guarda y sube los cambios para actualizar la web. Los vínculos `#p01` a `#p14` abren directamente cada punto.
+Añade las imágenes de las fichas a la carpeta que indiques en `url`; si queda vacío aparece un marcador. Guarda y sube los cambios para actualizar la web. Los vínculos `#p00` a `#p14` abren directamente cada punto.
 
 ## Probar en tu ordenador
 
 Desde esta carpeta ejecuta `python -m http.server 8000` (o `python3 -m http.server 8000`) y abre `http://localhost:8000`. Con ello las imágenes se sirven igual que en un alojamiento web. También puedes abrir `index.html` directamente, aunque algunos navegadores restringen las texturas WebGL desde archivos locales.
+
+## Ajustar el ancho de la ficha
+
+En ordenador, arrastra la barra fina que separa la panorámica del panel de texto. También puedes situarte sobre ella y pulsar las flechas izquierda/derecha. El ancho se recuerda en ese navegador. En móvil el panel ocupa todo el ancho disponible debajo de la panorámica.
