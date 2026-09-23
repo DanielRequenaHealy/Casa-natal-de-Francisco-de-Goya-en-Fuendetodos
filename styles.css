@@ -27,3 +27,8 @@
 .institution-logo img{position:absolute;width:235px;height:auto;max-width:none;top:-34px;left:-10px;display:block}
 @media(max-width:760px){.header-end{gap:9px}.institution-logo{width:127px;height:44px}.institution-logo img{width:150px;top:-20px;left:-12px}.kicker{font-size:.63rem;letter-spacing:.06em}}
 @media(max-width:500px){.counter{display:none}.institution-logo{width:112px}.institution-logo img{width:138px;top:-18px;left:-12px}header h1{font-size:1.12rem}}
+/* Selector compacto para móviles. */
+.mobile-select-label,.mobile-points{display:none}
+@media(max-width:760px){.rail{padding:12px 14px 14px}.rail-title,.rail #point-list{display:none}.mobile-select-label{display:block;font-size:.81rem;font-weight:700;color:#36545a;margin-bottom:6px}.mobile-points{display:block;width:100%;min-height:44px;padding:9px;border:1px solid #aebdb7;border-radius:6px;background:#fff;color:#1e383e;font:inherit;font-size:1rem}}
+.panorama-loading{position:absolute;inset:0;display:flex;flex-direction:column;gap:13px;justify-content:center;align-items:center;background:#152d36e8;color:#fff;font-size:1rem}.panorama-loading[hidden]{display:none}
+.loading-spinner{width:42px;height:42px;border-radius:50%;border:4px solid #fff5;border-top-color:#ecc48d;animation:panorama-spin .8s linear infinite}@keyframes panorama-spin{to{transform:rotate(360deg)}}

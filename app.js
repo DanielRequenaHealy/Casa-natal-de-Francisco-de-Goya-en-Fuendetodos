@@ -3,6 +3,7 @@
   var points = window.FICHAS || [];
   var canvas = document.getElementById('panorama');
   var missing = document.getElementById('missing');
+  var loading = document.getElementById('loading');
   var gl = canvas.getContext('webgl', { antialias: false });
   var state = { yaw: 0, pitch: 0, fov: 75, index: 0, texture: null, dragging: false, x: 0, y: 0, request: 0 };
   var program, position, uv, aspect, yaw, pitch, fov, texture;
@@ -52,12 +53,15 @@
   }
   function loadPanorama(point) {
     state.request+=1;var current=state.request; state.yaw=0;state.pitch=0;state.fov=75;
-    if(state.texture&&gl){gl.deleteTexture(state.texture);state.texture=null;}missing.hidden=false;
+    if(state.texture&&gl){gl.deleteTexture(state.texture);state.texture=null;}
+    missing.hidden=true;loading.hidden=false;
     document.getElementById('missing-name').textContent=point.titulo;
-    if(!point.panorama||!gl)return;
-    var img=new Image();img.onload=function(){if(current!==state.request)return;try{var tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);state.texture=tex;missing.hidden=true;draw();}catch(e){missing.hidden=false;}};img.onerror=function(){if(current===state.request)missing.hidden=false;};img.src=point.panorama;
+    function fail(message){if(current!==state.request)return;loading.hidden=true;missing.hidden=false;document.getElementById('missing-help').textContent=message;}
+    if(!gl){fail('Este navegador no admite la visualización WebGL.');return;}
+    if(!point.panorama){fail('Añade una ruta de imagen en datos/fichas.js.');return;}
+    var img=new Image();img.onload=function(){if(current!==state.request)return;try{var limit=gl.getParameter(gl.MAX_TEXTURE_SIZE);if(img.naturalWidth>limit||img.naturalHeight>limit){fail('Imagen demasiado grande para este dispositivo. Exporta una versión de menor resolución.');return;}var tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);state.texture=tex;loading.hidden=true;missing.hidden=true;draw();}catch(e){fail('No se pudo mostrar esta panorámica. Comprueba la imagen y su resolución.');}};img.onerror=function(){fail('No se encuentra '+point.panorama+'. Comprueba el nombre y la extensión del archivo.');};img.src=point.panorama;
   }
-  function select(i){state.index=i;var item=points[i];if(!item)return;document.querySelectorAll('.point').forEach(function(button,n){button.setAttribute('aria-current',n===i?'true':'false');});renderContent(item);loadPanorama(item);location.hash='p'+String(item.numero).padStart(2,'0');}
+  function select(i){state.index=i;var item=points[i];if(!item)return;document.querySelectorAll('.point').forEach(function(button,n){button.setAttribute('aria-current',n===i?'true':'false');});document.getElementById('mobile-points').value=String(item.numero);renderContent(item);loadPanorama(item);location.hash='p'+String(item.numero).padStart(2,'0');}
   var list=document.getElementById('point-list');
   var groups=[
     {from:0,to:0},
@@ -67,8 +71,10 @@
     {from:11,to:12,area:'Interior',floor:'Falsa'},
     {from:13,to:14,area:'Exterior'}
   ];
+  var mobile=document.getElementById('mobile-points');
   groups.forEach(function(group){
     var section=document.createElement('section');section.className='point-group';
+    var options=document.createElement('optgroup');options.label=[group.roman,group.area,group.floor].filter(Boolean).join(' · ')||'Ámbitos';
     if(group.area){var heading=document.createElement('h2');heading.className='group-heading';if(group.roman){var roman=document.createElement('span');roman.className='group-roman';roman.textContent=group.roman;heading.appendChild(roman);}heading.appendChild(document.createTextNode(group.area));section.appendChild(heading);}
     if(group.floor){var floor=document.createElement('h3');floor.className='group-floor';floor.textContent=group.floor;section.appendChild(floor);}
     points.forEach(function(point,i){
@@ -78,8 +84,10 @@
       var copy=document.createElement('span');copy.className='point-copy';copy.textContent=point.titulo;
       if(point.detalle){var detail=document.createElement('small');detail.className='point-detail';detail.textContent='['+point.detalle+']';copy.appendChild(detail);}
       button.appendChild(copy);button.onclick=function(){select(i);};section.appendChild(button);
-    });list.appendChild(section);
+      var option=document.createElement('option');option.value=String(point.numero);option.textContent=point.numero+' · '+point.titulo;options.appendChild(option);
+    });list.appendChild(section);mobile.appendChild(options);
   });
+  mobile.addEventListener('change',function(){var n=Number(mobile.value);var i=points.findIndex(function(point){return point.numero===n;});if(i>=0)select(i);});
   canvas.addEventListener('pointerdown',function(event){state.dragging=true;state.x=event.clientX;state.y=event.clientY;canvas.setPointerCapture(event.pointerId);});
   canvas.addEventListener('pointerup',function(){state.dragging=false;});canvas.addEventListener('pointercancel',function(){state.dragging=false;});
   canvas.addEventListener('pointermove',function(event){if(!state.dragging)return;state.yaw+=(event.clientX-state.x)*.004;state.pitch=Math.max(-1.45,Math.min(1.45,state.pitch+(event.clientY-state.y)*.004));state.x=event.clientX;state.y=event.clientY;draw();});

@@ -39,3 +39,11 @@ El índice agrupa los puntos en Ámbitos, I Exterior, II Interior (planta baja, 
 ## Logotipo de cabecera
 
 El logotipo blanco de la Diputación Provincial de Zaragoza está en `assets/diputacion-zaragoza.png`. Al actualizar desde este paquete, sube también la carpeta `assets` completa, además del `index.html` y `styles.css`. Su tamaño se controla en `styles.css` bajo «Logotipo blanco».
+
+## Navegación móvil
+
+El selector móvil reemplaza la larga lista horizontal y permite pasar directamente a cualquiera de los 15 ámbitos. La vista panorámica queda libre, sin tarjeta ni esquema superpuesto.
+
+## Comprobar el peso de las panorámicas
+
+Abre `herramientas/comprobar-panoramas.html` en tu ordenador y selecciona tus 15 JPG/PNG antes de subirlos. El informe indica archivos ausentes, tamaño por imagen y tamaño total. Esta herramienta funciona localmente, sin subir imágenes. Marca como grandes las de más de 10 MiB y avisa si alguna supera 25 MiB, límite de subida de archivos desde el navegador en GitHub. Tras elegir una vista, la web muestra «Cargando panorámica…» hasta que la imagen está lista; si no encuentra el archivo, muestra su ruta para ayudarte a corregir el nombre.
