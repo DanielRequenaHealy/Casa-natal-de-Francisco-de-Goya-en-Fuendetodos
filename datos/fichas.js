@@ -1,8 +1,8 @@
 window.FICHAS = [
   {
     "numero": 0,
-    "titulo": "LA CASA NATAL DE FRANCISCO DE GOYA Y LUCIENTES",
-    "panorama": "panoramas/00.png",
+    "titulo": "La casa natal de Francisco de Goya y Lucientes",
+    "panorama": "panoramas/00.jpg",
     "bloques": [
       {
         "tipo": "subtitulo",
@@ -159,7 +159,7 @@ window.FICHAS = [
   },
   {
     "numero": 1,
-    "titulo": "FACHADA OESTE A LA CALLE ALFÓNDIGA",
+    "titulo": "Fachada oeste a la calle Alfóndiga",
     "panorama": "panoramas/01.jpg",
     "bloques": [
       {
@@ -317,7 +317,7 @@ window.FICHAS = [
   },
   {
     "numero": 2,
-    "titulo": "Punto 02 · sustituir título",
+    "titulo": "Zaguán y fresquera",
     "panorama": "panoramas/02.jpg",
     "bloques": [
       {
@@ -475,7 +475,7 @@ window.FICHAS = [
   },
   {
     "numero": 3,
-    "titulo": "Punto 03 · sustituir título",
+    "titulo": "Cuadra",
     "panorama": "panoramas/03.jpg",
     "bloques": [
       {
@@ -633,7 +633,7 @@ window.FICHAS = [
   },
   {
     "numero": 4,
-    "titulo": "Punto 04 · sustituir título",
+    "titulo": "Cocina",
     "panorama": "panoramas/04.jpg",
     "bloques": [
       {
@@ -791,7 +791,7 @@ window.FICHAS = [
   },
   {
     "numero": 5,
-    "titulo": "Punto 05 · sustituir título",
+    "titulo": "Habitación al lado de la cocina",
     "panorama": "panoramas/05.jpg",
     "bloques": [
       {
@@ -949,7 +949,7 @@ window.FICHAS = [
   },
   {
     "numero": 6,
-    "titulo": "Punto 06 · sustituir título",
+    "titulo": "Escalera 1: ramal de acceso a la planta primera",
     "panorama": "panoramas/06.jpg",
     "bloques": [
       {
@@ -1107,7 +1107,7 @@ window.FICHAS = [
   },
   {
     "numero": 7,
-    "titulo": "Punto 07 · sustituir título",
+    "titulo": "Habitación este",
     "panorama": "panoramas/07.jpg",
     "bloques": [
       {
@@ -1261,11 +1261,12 @@ window.FICHAS = [
         "tipo": "texto",
         "texto": "[1] Cura párroco.\n[2] Fue hermana mayor de la madre de Goya y por tanto, tía suya. Padeció demencia."
       }
-    ]
+    ],
+    "detalle": "con vistas al Paseo de Vista Alegre"
   },
   {
     "numero": 8,
-    "titulo": "Punto 08 · sustituir título",
+    "titulo": "Sala",
     "panorama": "panoramas/08.jpg",
     "bloques": [
       {
@@ -1577,11 +1578,12 @@ window.FICHAS = [
         "tipo": "texto",
         "texto": "[1] Cura párroco.\n[2] Fue hermana mayor de la madre de Goya y por tanto, tía suya. Padeció demencia."
       }
-    ]
+    ],
+    "detalle": "habitación donde presuntamente nació Francisco de Goya y Lucientes"
   },
   {
     "numero": 10,
-    "titulo": "Punto 10 · sustituir título",
+    "titulo": "Alcoba sureste",
     "panorama": "panoramas/10.jpg",
     "bloques": [
       {
@@ -1739,7 +1741,7 @@ window.FICHAS = [
   },
   {
     "numero": 11,
-    "titulo": "Punto 11 · sustituir título",
+    "titulo": "Escalera 2: ramal de acceso a la falsa",
     "panorama": "panoramas/11.jpg",
     "bloques": [
       {
@@ -1897,7 +1899,7 @@ window.FICHAS = [
   },
   {
     "numero": 12,
-    "titulo": "Punto 12 · sustituir título",
+    "titulo": "Falsa",
     "panorama": "panoramas/12.jpg",
     "bloques": [
       {
@@ -2055,7 +2057,7 @@ window.FICHAS = [
   },
   {
     "numero": 13,
-    "titulo": "Punto 13 · sustituir título",
+    "titulo": "Fachada posterior este al Paseo de Vista Alegre",
     "panorama": "panoramas/13.jpg",
     "bloques": [
       {
@@ -2209,11 +2211,12 @@ window.FICHAS = [
         "tipo": "texto",
         "texto": "[1] Cura párroco.\n[2] Fue hermana mayor de la madre de Goya y por tanto, tía suya. Padeció demencia."
       }
-    ]
+    ],
+    "detalle": "carretera autonómica A-2101"
   },
   {
     "numero": 14,
-    "titulo": "Punto 14 · sustituir título",
+    "titulo": "Tejado",
     "panorama": "panoramas/14.jpg",
     "bloques": [
       {

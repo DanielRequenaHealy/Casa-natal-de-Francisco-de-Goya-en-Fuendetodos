@@ -58,7 +58,28 @@
     var img=new Image();img.onload=function(){if(current!==state.request)return;try{var tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);state.texture=tex;missing.hidden=true;draw();}catch(e){missing.hidden=false;}};img.onerror=function(){if(current===state.request)missing.hidden=false;};img.src=point.panorama;
   }
   function select(i){state.index=i;var item=points[i];if(!item)return;document.querySelectorAll('.point').forEach(function(button,n){button.setAttribute('aria-current',n===i?'true':'false');});renderContent(item);loadPanorama(item);location.hash='p'+String(item.numero).padStart(2,'0');}
-  var list=document.getElementById('point-list');points.forEach(function(point,i){var button=document.createElement('button');button.type='button';button.className='point';button.innerHTML='<b>'+String(point.numero).padStart(2,'0')+'</b><span></span>';button.querySelector('span').textContent=point.titulo;button.onclick=function(){select(i);};list.appendChild(button);});
+  var list=document.getElementById('point-list');
+  var groups=[
+    {from:0,to:0},
+    {from:1,to:1,roman:'I',area:'Exterior'},
+    {from:2,to:5,roman:'II',area:'Interior',floor:'Planta baja'},
+    {from:6,to:10,area:'Interior',floor:'Planta primera'},
+    {from:11,to:12,area:'Interior',floor:'Falsa'},
+    {from:13,to:14,area:'Exterior'}
+  ];
+  groups.forEach(function(group){
+    var section=document.createElement('section');section.className='point-group';
+    if(group.area){var heading=document.createElement('h2');heading.className='group-heading';if(group.roman){var roman=document.createElement('span');roman.className='group-roman';roman.textContent=group.roman;heading.appendChild(roman);}heading.appendChild(document.createTextNode(group.area));section.appendChild(heading);}
+    if(group.floor){var floor=document.createElement('h3');floor.className='group-floor';floor.textContent=group.floor;section.appendChild(floor);}
+    points.forEach(function(point,i){
+      if(point.numero<group.from||point.numero>group.to)return;
+      var button=document.createElement('button');button.type='button';button.className='point';
+      var number=document.createElement('b');number.textContent=String(point.numero);button.appendChild(number);
+      var copy=document.createElement('span');copy.className='point-copy';copy.textContent=point.titulo;
+      if(point.detalle){var detail=document.createElement('small');detail.className='point-detail';detail.textContent='['+point.detalle+']';copy.appendChild(detail);}
+      button.appendChild(copy);button.onclick=function(){select(i);};section.appendChild(button);
+    });list.appendChild(section);
+  });
   canvas.addEventListener('pointerdown',function(event){state.dragging=true;state.x=event.clientX;state.y=event.clientY;canvas.setPointerCapture(event.pointerId);});
   canvas.addEventListener('pointerup',function(){state.dragging=false;});canvas.addEventListener('pointercancel',function(){state.dragging=false;});
   canvas.addEventListener('pointermove',function(event){if(!state.dragging)return;state.yaw+=(event.clientX-state.x)*.004;state.pitch=Math.max(-1.45,Math.min(1.45,state.pitch+(event.clientY-state.y)*.004));state.x=event.clientX;state.y=event.clientY;draw();});
@@ -67,7 +88,7 @@
   var savedWidth=Number(localStorage.getItem('goya-story-width'));
   function setStoryWidth(width,remember){
     if(window.innerWidth<=760)return;
-    var rail=window.innerWidth<=1060?160:210;
+    var rail=window.innerWidth<=1060?200:250;
     var available=workspace.clientWidth-rail-10-(window.innerWidth<=1060?250:320);
     var adjusted=Math.max(300,Math.min(width,available));
     workspace.style.setProperty('--story-width',adjusted+'px');

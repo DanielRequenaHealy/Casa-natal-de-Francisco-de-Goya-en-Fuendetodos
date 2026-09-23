@@ -16,7 +16,7 @@ Exporta tus 15 panoramas 360º equirectangulares desde Twinmotion como JPG y gu�
 
 ## Editar texto e imágenes
 
-Abre `datos/fichas.js` con un editor de texto. En cada uno de los 15 puntos modifica `titulo`, `panorama` y `bloques`. El texto completo de «Alcoba suroeste» está copiado como plantilla en los 15 puntos; el punto 09 ya tiene ese título.
+Abre `datos/fichas.js` con un editor de texto. En cada uno de los 15 puntos modifica `titulo`, la aclaración opcional `detalle`, `panorama` y `bloques`. El texto completo de «Alcoba suroeste» está copiado como plantilla en los 15 puntos; el punto 09 ya tiene ese título.
 
 - Texto: `{"tipo":"texto","texto":"Explicación con [A] y [1]"}`.
 - Título: `{"tipo":"subtitulo","texto":"Planos"}`.
@@ -31,3 +31,7 @@ Desde esta carpeta ejecuta `python -m http.server 8000` (o `python3 -m http.serv
 ## Ajustar el ancho de la ficha
 
 En ordenador, arrastra la barra fina que separa la panorámica del panel de texto. También puedes situarte sobre ella y pulsar las flechas izquierda/derecha. El ancho se recuerda en ese navegador. En móvil el panel ocupa todo el ancho disponible debajo de la panorámica.
+
+## Índice de la columna izquierda
+
+El índice agrupa los puntos en Ámbitos, I Exterior, II Interior (planta baja, planta primera y falsa) y Exterior. Los títulos y las aclaraciones entre corchetes vienen de `datos/fichas.js`; los encabezados de grupo están definidos en `app.js`. Si ya has personalizado textos en un `fichas.js` anterior, guarda una copia antes de reemplazarlo.

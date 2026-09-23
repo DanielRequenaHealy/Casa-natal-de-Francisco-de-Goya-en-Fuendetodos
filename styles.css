@@ -7,3 +7,17 @@
 .panel-resizer:focus-visible{outline:2px solid #ad6b3b;outline-offset:-2px}
 @media(max-width:1060px){.workspace{grid-template-columns:160px minmax(250px,1fr) 10px minmax(300px,var(--story-width))}}
 @media(max-width:760px){.workspace{display:flex}.panel-resizer{display:none}}
+/* Índice por ámbitos y plantas. */
+.workspace{grid-template-columns:250px minmax(320px,1fr) 10px minmax(300px,var(--story-width))}
+.rail-title{padding:21px 18px 9px;color:#233c42;font-size:.86rem}
+.point-group{border-top:1px solid #dce0da;padding:13px 0 9px}
+.point-group:first-child{padding-top:0;border:0}
+.group-heading{display:flex;align-items:baseline;gap:10px;margin:0 18px 5px;font-size:.94rem;font-weight:750;color:#15343c}
+.group-roman{color:#a36738;font:700 1.25rem Georgia,serif;min-width:20px}
+.group-floor{font-size:.8rem;text-transform:uppercase;letter-spacing:.09em;color:#64716d;margin:1px 18px 8px;font-weight:750}
+.point{align-items:flex-start;gap:13px;padding:10px 12px;min-height:45px}
+.point b{flex:0 0 19px;text-align:right;line-height:1.4}
+.point-copy{display:block;min-width:0;overflow-wrap:anywhere}
+.point-detail{display:block;font-size:.78rem;font-weight:400;color:#687675;line-height:1.4;margin-top:4px}
+@media(max-width:1060px){.workspace{grid-template-columns:200px minmax(250px,1fr) 10px minmax(300px,var(--story-width))}.group-heading{margin-left:12px}.group-floor{margin-left:12px}.point{padding-left:8px}}
+@media(max-width:760px){.workspace{display:flex}.rail #point-list{display:flex;align-items:stretch}.point-group{flex:0 0 auto;border-top:0;border-right:1px solid #dce0da;padding:5px 0 6px}.point-group:first-child{padding-top:5px}.group-heading{font-size:.8rem;margin:0 10px 2px}.group-roman{font-size:1rem;min-width:auto}.group-floor{font-size:.72rem;margin:0 10px 4px}.point-group .point{display:inline-flex;vertical-align:top;white-space:normal;width:175px;min-height:82px;padding:7px;flex:0 0 175px}.point-detail{font-size:.72rem}}
