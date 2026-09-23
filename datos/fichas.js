@@ -1,8 +1,8 @@
 window.FICHAS = [
   {
     "numero": 0,
-    "titulo": "Punto 00 · sustituir título",
-    "panorama": "panoramas/00.jpg",
+    "titulo": "LA CASA NATAL DE FRANCISCO DE GOYA Y LUCIENTES",
+    "panorama": "panoramas/00.png",
     "bloques": [
       {
         "tipo": "subtitulo",
@@ -159,7 +159,7 @@ window.FICHAS = [
   },
   {
     "numero": 1,
-    "titulo": "Punto 01 · sustituir título",
+    "titulo": "FACHADA OESTE A LA CALLE ALFÓNDIGA",
     "panorama": "panoramas/01.jpg",
     "bloques": [
       {
