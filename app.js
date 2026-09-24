@@ -124,7 +124,32 @@
     image.onerror=function(){if(cameraPlanImage===image)cameraPlan.hidden=true;};
     image.src=path;
   }
-  function select(i){state.index=i;var item=points[i];if(!item)return;document.querySelectorAll('.point').forEach(function(button,n){button.setAttribute('aria-current',n===i?'true':'false');});document.getElementById('mobile-points').value=String(item.numero);showCameraPlan(item);renderContent(item);loadPanorama(item);location.hash='p'+String(item.numero).padStart(2,'0');}
+  function select(i){
+    var item=points[i];if(!item)return;
+    var story=document.querySelector('.story');
+    if(state.storyTimer){clearTimeout(state.storyTimer);state.storyTimer=null;}
+    story.classList.remove('story-leave','story-enter');
+    state.index=i;
+    document.querySelectorAll('.point').forEach(function(button,n){button.setAttribute('aria-current',n===i?'true':'false');});
+    document.getElementById('mobile-points').value=String(item.numero);
+    location.hash='p'+String(item.numero).padStart(2,'0');
+    function showNew(){
+      state.renderedIndex=i;
+      showCameraPlan(item);renderContent(item);loadPanorama(item);
+    }
+    if(state.renderedIndex===undefined||state.renderedIndex===i||window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+      if(state.renderedIndex!==i)showNew();
+      return;
+    }
+    void story.offsetWidth;
+    story.classList.add('story-leave');
+    state.storyTimer=setTimeout(function(){
+      state.storyTimer=null;
+      story.classList.remove('story-leave');
+      showNew();
+      story.classList.add('story-enter');
+    },110);
+  }
   var list=document.getElementById('point-list');
   var groups=[
     {from:0,to:0},
@@ -159,7 +184,7 @@
   var savedWidth=Number(localStorage.getItem('goya-story-width'));
   function setStoryWidth(width,remember){
     if(window.innerWidth<=760)return;
-    var rail=window.innerWidth<=1060?200:250;
+    var rail=window.innerWidth<=1060?220:280;
     var available=workspace.clientWidth-rail-10-(window.innerWidth<=1060?250:320);
     var adjusted=Math.max(300,Math.min(width,available));
     workspace.style.setProperty('--story-width',adjusted+'px');

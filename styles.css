@@ -40,3 +40,10 @@
 /* Algo más de anchura para que los nombres de los ámbitos ocupen menos líneas. */
 @media(min-width:1061px){.workspace{grid-template-columns:280px minmax(320px,1fr) 10px minmax(300px,var(--story-width))}}
 @media(min-width:761px) and (max-width:1060px){.workspace{grid-template-columns:220px minmax(250px,1fr) 10px minmax(300px,var(--story-width))}}
+/* La ficha anterior sale a la derecha; la nueva entra desde la junta. */
+@media(prefers-reduced-motion:no-preference){
+  .story.story-leave .story-head,.story.story-leave .story-body{animation:story-leave 110ms ease-in both}
+  .story.story-enter .story-head,.story.story-enter .story-body{animation:story-enter 190ms ease-out both}
+  @keyframes story-leave{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(24px)}}
+  @keyframes story-enter{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
+}
