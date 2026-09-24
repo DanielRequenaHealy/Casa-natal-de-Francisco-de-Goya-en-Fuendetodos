@@ -33,7 +33,10 @@
 .panorama-loading{position:absolute;inset:0;display:flex;flex-direction:column;gap:13px;justify-content:center;align-items:center;background:#152d36e8;color:#fff;font-size:1rem}.panorama-loading[hidden]{display:none}
 .loading-spinner{width:42px;height:42px;border-radius:50%;border:4px solid #fff5;border-top-color:#ecc48d;animation:panorama-spin .8s linear infinite}@keyframes panorama-spin{to{transform:rotate(360deg)}}
 /* Plano de cámara ligado al borde derecho de la panorámica. */
-.camera-plan{position:absolute;right:16px;bottom:16px;width:min(520px,90%);max-height:min(76vh,500px);overflow:hidden;pointer-events:none}
+.camera-plan{position:absolute;right:16px;bottom:16px;width:min(520px,calc(100% - 32px));max-height:min(76vh,500px);display:flex;justify-content:flex-end;align-items:flex-end;overflow:hidden;pointer-events:none}
 .camera-plan[hidden]{display:none}
-.camera-plan img{display:block;width:100%;height:auto;max-height:min(76vh,500px);object-fit:contain}
-@media(max-width:760px){.camera-plan{right:10px;bottom:10px;width:min(380px,90%);max-height:min(260px,85%)}.camera-plan img{max-height:260px}.viewer-tip{bottom:auto;top:12px;left:10px}}
+.camera-plan img{display:block;width:auto;height:auto;max-width:100%;max-height:min(76vh,500px);object-fit:contain}
+@media(max-width:760px){.camera-plan{right:10px;bottom:10px;width:min(380px,calc(100% - 20px));max-height:min(260px,85%)}.camera-plan img{max-height:260px}.viewer-tip{bottom:auto;top:12px;left:10px}}
+/* Algo más de anchura para que los nombres de los ámbitos ocupen menos líneas. */
+@media(min-width:1061px){.workspace{grid-template-columns:280px minmax(320px,1fr) 10px minmax(300px,var(--story-width))}}
+@media(min-width:761px) and (max-width:1060px){.workspace{grid-template-columns:220px minmax(250px,1fr) 10px minmax(300px,var(--story-width))}}
