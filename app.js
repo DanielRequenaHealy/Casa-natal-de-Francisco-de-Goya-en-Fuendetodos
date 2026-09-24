@@ -4,6 +4,8 @@
   var canvas = document.getElementById('panorama');
   var missing = document.getElementById('missing');
   var loading = document.getElementById('loading');
+  var cameraPlan = document.getElementById('camera-plan');
+  var cameraPlanImage = document.getElementById('camera-plan-image');
   var gl = canvas.getContext('webgl', { antialias: false });
   var state = { yaw: 0, pitch: 0, fov: 75, index: 0, texture: null, dragging: false, x: 0, y: 0, request: 0 };
   var program, position, uv, aspect, yaw, pitch, fov, texture;
@@ -51,17 +53,78 @@
     });
     document.querySelector('.story').scrollTop=0;
   }
-  function loadPanorama(point) {
-    state.request+=1;var current=state.request; state.yaw=0;state.pitch=0;state.fov=75;
+  async function imageDimensions(blob) {
+    // Leer la cabecera evita decodificar la imagen antes de solicitar el tamaño adecuado.
+    var bytes=new DataView(await blob.slice(0,Math.min(blob.size,1024*1024)).arrayBuffer());
+    if(bytes.byteLength>=24&&bytes.getUint32(0)===0x89504e47&&bytes.getUint32(4)===0x0d0a1a0a)
+      return {width:bytes.getUint32(16),height:bytes.getUint32(20)};
+    if(bytes.byteLength>=4&&bytes.getUint16(0)===0xffd8){
+      var pos=2;
+      while(pos+9<bytes.byteLength){
+        if(bytes.getUint8(pos)!==0xff){pos++;continue;}
+        var marker=bytes.getUint8(pos+1);pos+=2;
+        if(marker===0xff||marker===0x00)continue;
+        if(marker===0xd9||marker===0xda)break;
+        if(marker===0x01||(marker>=0xd0&&marker<=0xd7))continue;
+        if(pos+2>bytes.byteLength)break;
+        var length=bytes.getUint16(pos);if(length<2||pos+length>bytes.byteLength)break;
+        if((marker>=0xc0&&marker<=0xc3)||(marker>=0xc5&&marker<=0xc7)||(marker>=0xc9&&marker<=0xcb)||(marker>=0xcd&&marker<=0xcf))
+          return {width:bytes.getUint16(pos+5),height:bytes.getUint16(pos+3)};
+        pos+=length;
+      }
+    }
+    return null;
+  }
+  async function loadPanorama(point) {
+    if(state.abort)state.abort.abort();state.abort=new AbortController();
+    state.request+=1;var current=state.request;state.yaw=0;state.pitch=0;state.fov=75;
     if(state.texture&&gl){gl.deleteTexture(state.texture);state.texture=null;}
     missing.hidden=true;loading.hidden=false;
     document.getElementById('missing-name').textContent=point.titulo;
     function fail(message){if(current!==state.request)return;loading.hidden=true;missing.hidden=false;document.getElementById('missing-help').textContent=message;}
     if(!gl){fail('Este navegador no admite la visualización WebGL.');return;}
     if(!point.panorama){fail('Añade una ruta de imagen en datos/fichas.js.');return;}
-    var img=new Image();img.onload=function(){if(current!==state.request)return;try{var limit=gl.getParameter(gl.MAX_TEXTURE_SIZE);if(img.naturalWidth>limit||img.naturalHeight>limit){fail('Imagen demasiado grande para este dispositivo. Exporta una versión de menor resolución.');return;}var tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);state.texture=tex;loading.hidden=true;missing.hidden=true;draw();}catch(e){fail('No se pudo mostrar esta panorámica. Comprueba la imagen y su resolución.');}};img.onerror=function(){fail('No se encuentra '+point.panorama+'. Comprueba el nombre y la extensión del archivo.');};img.src=point.panorama;
+    var bitmap=null,tex=null;
+    try{
+      var response=await fetch(point.panorama,{signal:state.abort.signal});if(!response.ok)throw new Error('Archivo no encontrado');
+      var blob=await response.blob();if(current!==state.request)return;
+      var size=await imageDimensions(blob);
+      var mobile=window.matchMedia('(pointer: coarse)').matches||window.innerWidth<=760;
+      var limit=Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE),mobile?4096:Infinity);
+      if(!Number.isFinite(limit)||limit<1)throw new Error('Límite de textura desconocido');
+      if(!window.createImageBitmap)throw new Error('Este navegador no permite adaptar imágenes grandes');
+      var options={imageOrientation:'flipY'};
+      if(size&&size.width&&size.height){var factor=Math.min(1,limit/size.width,limit/size.height);
+        if(factor<1){options.resizeWidth=Math.max(1,Math.floor(size.width*factor));options.resizeHeight=Math.max(1,Math.floor(size.height*factor));options.resizeQuality='high';}
+      }
+      bitmap=await createImageBitmap(blob,options);
+      if(current!==state.request)return;
+      if(bitmap.width>limit||bitmap.height>limit)throw new Error('La reducción de imagen no está disponible en este navegador');
+      tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+      // ImageBitmap aplica el volteo al decodificar; no se repite durante la subida a WebGL.
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
+      gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,bitmap);
+      if(gl.getError()!==gl.NO_ERROR)throw new Error('No hay memoria de vídeo suficiente');
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+      state.texture=tex;tex=null;loading.hidden=true;missing.hidden=true;draw();
+    }catch(e){
+      fail(e.message==='Archivo no encontrado'?'No se encuentra '+point.panorama+'. Comprueba el nombre del archivo.':'Este dispositivo no pudo procesar la imagen original. Para esta vista hará falta una versión de menor tamaño.');
+    }finally{if(bitmap)bitmap.close();if(tex)gl.deleteTexture(tex);}
   }
-  function select(i){state.index=i;var item=points[i];if(!item)return;document.querySelectorAll('.point').forEach(function(button,n){button.setAttribute('aria-current',n===i?'true':'false');});document.getElementById('mobile-points').value=String(item.numero);renderContent(item);loadPanorama(item);location.hash='p'+String(item.numero).padStart(2,'0');}
+  function showCameraPlan(point){
+    var path=point.planoCamara||'planos/'+String(point.numero).padStart(2,'0')+'_mapa.png';
+    cameraPlan.hidden=true;
+    var image=new Image();
+    image.alt='Plano de ubicación de la cámara '+String(point.numero).padStart(2,'0');
+    cameraPlan.replaceChildren(image);cameraPlanImage=image;
+    image.onload=function(){if(cameraPlanImage===image)cameraPlan.hidden=false;};
+    image.onerror=function(){if(cameraPlanImage===image)cameraPlan.hidden=true;};
+    image.src=path;
+  }
+  function select(i){state.index=i;var item=points[i];if(!item)return;document.querySelectorAll('.point').forEach(function(button,n){button.setAttribute('aria-current',n===i?'true':'false');});document.getElementById('mobile-points').value=String(item.numero);showCameraPlan(item);renderContent(item);loadPanorama(item);location.hash='p'+String(item.numero).padStart(2,'0');}
   var list=document.getElementById('point-list');
   var groups=[
     {from:0,to:0},
