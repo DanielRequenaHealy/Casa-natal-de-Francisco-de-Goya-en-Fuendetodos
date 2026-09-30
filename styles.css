@@ -47,15 +47,15 @@
   @keyframes story-leave{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(24px)}}
   @keyframes story-enter{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:translateX(0)}}
 }
-/* Móvil: logotipo completo, más espacio para leer y acceso visible a la ficha. */
+/* Móvil: logotipo completo, panorama amplio y acceso visible a la ficha. */
 .mobile-story-link{display:none}
 @media(max-width:760px){.wheel-tip{display:none}}
 @media(max-width:760px){
   .institution-logo{width:128px;height:38px}
   .institution-logo img{width:132px;height:auto;top:-20px;left:-5px}
-  .viewer{height:clamp(220px,42dvh,330px);min-height:220px}
-  .camera-plan{max-height:calc(100% - 20px)}
-  .camera-plan img{max-height:min(240px,calc(42dvh - 30px))}
+  .viewer{height:min(58vh,470px);height:min(58dvh,470px);min-height:270px}
+  .camera-plan{max-height:min(260px,85%)}
+  .camera-plan img{max-height:260px}
   .mobile-story-link{display:flex;order:2;width:100%;min-height:46px;align-items:center;justify-content:center;gap:9px;border:0;border-top:1px solid #bfcac6;border-bottom:1px solid #bfcac6;background:#dce9e8;color:#15343c;font-weight:750;cursor:pointer}
   .mobile-story-link span{font-size:1.3rem;line-height:1}
   .story{order:3}
