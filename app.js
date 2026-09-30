@@ -176,9 +176,44 @@
     });list.appendChild(section);mobile.appendChild(options);
   });
   mobile.addEventListener('change',function(){var n=Number(mobile.value);var i=points.findIndex(function(point){return point.numero===n;});if(i>=0)select(i);});
-  canvas.addEventListener('pointerdown',function(event){state.dragging=true;state.x=event.clientX;state.y=event.clientY;canvas.setPointerCapture(event.pointerId);});
-  canvas.addEventListener('pointerup',function(){state.dragging=false;});canvas.addEventListener('pointercancel',function(){state.dragging=false;});
-  canvas.addEventListener('pointermove',function(event){if(!state.dragging)return;state.yaw+=(event.clientX-state.x)*.004;state.pitch=Math.max(-1.45,Math.min(1.45,state.pitch+(event.clientY-state.y)*.004));state.x=event.clientX;state.y=event.clientY;draw();});
+  document.querySelector('.mobile-story-link').addEventListener('click',function(){
+    document.getElementById('story').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  });
+  function pointerRay(event){
+    var rect=canvas.getBoundingClientRect(),t=Math.tan(state.fov*Math.PI/360);
+    var x=(2*(event.clientX-rect.left)/rect.width-1)*t*rect.width/rect.height;
+    var y=(1-2*(event.clientY-rect.top)/rect.height)*t;
+    var length=Math.hypot(x,y,1);
+    return {x:x/length,y:y/length,z:-1/length};
+  }
+  function rotateRay(ray,p,y){
+    var cp=Math.cos(p),sp=Math.sin(p),cy=Math.cos(y),sy=Math.sin(y);
+    var z=ray.y*sp+ray.z*cp;
+    return {x:ray.x*cy-z*sy,y:ray.y*cp-ray.z*sp,z:ray.x*sy+z*cy};
+  }
+  function angleNear(angle,reference){return reference+Math.atan2(Math.sin(angle-reference),Math.cos(angle-reference));}
+  canvas.addEventListener('pointerdown',function(event){
+    if(state.dragging||!event.isPrimary)return;
+    state.dragging=true;state.pointerId=event.pointerId;
+    state.anchor=rotateRay(pointerRay(event),state.pitch,state.yaw);
+    canvas.setPointerCapture(event.pointerId);event.preventDefault();
+  });
+  function stopDrag(event){if(event.pointerId===state.pointerId){state.dragging=false;state.anchor=null;}}
+  canvas.addEventListener('pointerup',stopDrag);canvas.addEventListener('pointercancel',stopDrag);
+  canvas.addEventListener('lostpointercapture',stopDrag);
+  canvas.addEventListener('pointermove',function(event){
+    if(!state.dragging||event.pointerId!==state.pointerId||!state.anchor)return;
+    var ray=pointerRay(event),anchor=state.anchor;
+    var amplitude=Math.hypot(ray.y,ray.z),phase=Math.atan2(-ray.z,ray.y);
+    var delta=Math.acos(Math.max(-1,Math.min(1,anchor.y/amplitude)));
+    var first=angleNear(phase-delta,state.pitch),second=angleNear(phase+delta,state.pitch);
+    var nextPitch=Math.abs(first-state.pitch)<=Math.abs(second-state.pitch)?first:second;
+    state.pitch=Math.max(-1.45,Math.min(1.45,nextPitch));
+    var rotatedZ=ray.y*Math.sin(state.pitch)+ray.z*Math.cos(state.pitch);
+    var nextYaw=Math.atan2(anchor.z,anchor.x)-Math.atan2(rotatedZ,ray.x);
+    state.yaw=angleNear(nextYaw,state.yaw);
+    draw();
+  });
   canvas.addEventListener('wheel',function(event){event.preventDefault();state.fov=Math.max(35,Math.min(95,state.fov+Math.sign(event.deltaY)*4));draw();},{passive:false});window.addEventListener('resize',draw);
   var workspace=document.querySelector('.workspace');var resizer=document.getElementById('panel-resizer');
   var savedWidth=Number(localStorage.getItem('goya-story-width'));
