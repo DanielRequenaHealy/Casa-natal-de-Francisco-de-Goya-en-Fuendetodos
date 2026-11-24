@@ -26,30 +26,40 @@
     if (canvas.width !== width || canvas.height !== height) { canvas.width=width;canvas.height=height;gl.viewport(0,0,width,height); }
     gl.uniform1f(aspect,width/height); gl.uniform1f(yaw,state.yaw); gl.uniform1f(pitch,state.pitch); gl.uniform1f(fov,state.fov*Math.PI/180); gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,state.texture);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   }
-  function rich(node, content, notePrefix) {
-    var chunks=String(content||'').split(/(\[\^\d+\]|\*\*[^*]+\*\*|\*[^*]+\*|\[[a-zA-Z]\]|\[\d+\])/g);
+  function storyLink(label, target) {
+    var link=document.createElement('a');
+    link.href='#'+target;
+    link.textContent=label;
+    link.addEventListener('click',function (event) {
+      var item=document.getElementById(target);
+      if (!item) return;
+      event.preventDefault();
+      item.focus();
+      item.scrollIntoView({block:'nearest'});
+    });
+    return link;
+  }
+  function rich(node, content, notePrefix, figures) {
+    var chunks=String(content||'').split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\[\]\n]+\])/g);
     chunks.forEach(function (chunk) {
       if (!chunk) return;
       var note=/^\[\^(\d+)\]$/.exec(chunk);
       if (notePrefix&&note) {
         var sup=document.createElement('sup');
-        var link=document.createElement('a');
-        var target=notePrefix+note[1];
-        link.href='#'+target;
-        link.textContent=note[1];
+        var link=storyLink(note[1],notePrefix+note[1]);
         link.setAttribute('aria-label','Nota al pie '+note[1]);
-        link.addEventListener('click',function (event) {
-          var item=document.getElementById(target);
-          if (!item) return;
-          event.preventDefault();
-          item.focus();
-          item.scrollIntoView({block:'nearest'});
-        });
         sup.appendChild(link);
         node.appendChild(sup);
         return;
       }
-      var tag = /^\*\*.*\*\*$/.test(chunk) ? 'strong' : /^\*.*\*$/.test(chunk) ? 'em' : /^\[[a-zA-Z0-9]+\]$/.test(chunk) ? 'span' : '';
+      var target=figures&&figures.get(chunk.toUpperCase());
+      if (target) {
+        var reference=storyLink(chunk,target);
+        reference.className='inline-ref';
+        node.appendChild(reference);
+        return;
+      }
+      var tag = /^\*\*.*\*\*$/.test(chunk) ? 'strong' : /^\*.*\*$/.test(chunk) ? 'em' : /^\[(?:[a-zA-Z]|\d+)\]$/.test(chunk) ? 'span' : '';
       if (!tag) { node.appendChild(document.createTextNode(chunk)); return; }
       var piece=document.createElement(tag);if(tag==='span')piece.className='inline-ref';piece.textContent=tag==='strong'?chunk.slice(2,-2):tag==='em'?chunk.slice(1,-1):chunk;node.appendChild(piece);
     });
@@ -87,14 +97,42 @@
       var markdown=await response.text();
       if (status.parentNode!==body) return;
       var paragraphs=markdown.replace(/\r\n/g,'\n').trimEnd().split(/\n[ \t]*\n/);
-      if (paragraphs[0].startsWith('# ')) title.textContent=paragraphs.shift().slice(2);
+      var headingText=paragraphs[0].startsWith('# ')?paragraphs.shift().slice(2):'';
       var content=document.createElement('article');
       content.className='markdown-story';
       var notes=document.createElement('ol');
       notes.className='story-footnotes';
       notes.setAttribute('aria-label','Notas al pie');
       var notePrefix='ficha-'+point.numero+'-nota-';
-      paragraphs.forEach(function (paragraph) {
+      var figures=new Map();
+      var images=paragraphs.map(function (paragraph) {
+        var image=/^!\[([^\]]+)\]\((\.\.\/\.\.\/fotos\/[\w.-]+)\)(?:\n([\s\S]+))?$/.exec(paragraph);
+        if (image) figures.set('['+image[1].toUpperCase()+']','ficha-'+point.numero+'-figura-'+figures.size);
+        return image;
+      });
+      if (headingText) {
+        title.replaceChildren();
+        rich(title,headingText,notePrefix,figures);
+      }
+      paragraphs.forEach(function (paragraph,index) {
+        var image=images[index];
+        if (image) {
+          var figure=document.createElement('figure');
+          figure.id=figures.get('['+image[1].toUpperCase()+']');
+          figure.tabIndex=-1;
+          var label=document.createElement('span');
+          label.className='figure-ref';
+          label.textContent='['+image[1]+']';
+          var photo=document.createElement('img');
+          photo.src=new URL(image[2],response.url).href;
+          photo.alt=image[3]?'':image[1];
+          photo.loading='lazy';
+          var caption=document.createElement('figcaption');
+          rich(caption,image[3]);
+          figure.append(label,photo,caption);
+          content.appendChild(figure);
+          return;
+        }
         var definition=/^\[\^(\d+)\]:\s+([\s\S]+)$/.exec(paragraph);
         if (definition) {
           var item=document.createElement('li');
@@ -114,7 +152,7 @@
         if (author) element.className='story-author';
         var text=author?paragraph.slice('<!-- autoría -->\n'.length):
           heading?paragraph.slice(3):quote?paragraph.slice(2):indent?paragraph.slice(1):paragraph;
-        rich(element,text.replace(/\r?\n/g,' '),notePrefix);
+        rich(element,text.replace(/\r?\n/g,' '),notePrefix,figures);
         content.appendChild(element);
       });
       if (notes.childElementCount) content.appendChild(notes);
