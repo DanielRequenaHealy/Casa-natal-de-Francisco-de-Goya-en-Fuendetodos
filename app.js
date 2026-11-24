@@ -54,14 +54,14 @@
       }
       var target=figures&&figures.get(chunk.toUpperCase());
       if (target) {
-        var reference=storyLink(chunk,target);
+        var reference=storyLink(/^\[[a-z]\]$/.test(chunk)?chunk.toUpperCase():chunk,target);
         reference.className='inline-ref';
         node.appendChild(reference);
         return;
       }
       var tag = /^\*\*.*\*\*$/.test(chunk) ? 'strong' : /^\*.*\*$/.test(chunk) ? 'em' : /^\[(?:[a-zA-Z]|\d+)\]$/.test(chunk) ? 'span' : '';
       if (!tag) { node.appendChild(document.createTextNode(chunk)); return; }
-      var piece=document.createElement(tag);if(tag==='span')piece.className='inline-ref';piece.textContent=tag==='strong'?chunk.slice(2,-2):tag==='em'?chunk.slice(1,-1):chunk;node.appendChild(piece);
+      var piece=document.createElement(tag);if(tag==='span')piece.className='inline-ref';piece.textContent=tag==='span'?chunk.toUpperCase():chunk.slice(tag==='strong'?2:1,tag==='strong'?-2:-1);node.appendChild(piece);
     });
   }
   function renderContent(point) {
@@ -78,7 +78,7 @@
     (point.bloques||[]).forEach(function (block) {
       if (block.tipo==='texto'||block.tipo==='subtitulo') { var el=document.createElement(block.tipo==='texto'?'p':'h3');rich(el,block.texto);body.appendChild(el); }
       else if(block.tipo==='imagen') {
-        var fig=document.createElement('figure');if(block.referencia){var ref=document.createElement('span');ref.className='figure-ref';ref.textContent='['+block.referencia+']';fig.appendChild(ref);}
+        var fig=document.createElement('figure');if(block.referencia){var ref=document.createElement('span');ref.className='figure-ref';ref.textContent='['+String(block.referencia).toUpperCase()+']';fig.appendChild(ref);}
         if(block.codigo){var code=document.createElement('div');code.className='file-ref';code.textContent='['+block.codigo+']';fig.appendChild(code);}
         var visual=document.createElement('div');visual.className='photo';visual.textContent='Imagen pendiente · '+(block.codigo||'');
         if(block.url){var img=new Image();img.alt=block.pie||'Documento gráfico';img.loading='lazy';img.onload=function(){visual.replaceChildren(img);};img.src=block.url;}
@@ -122,7 +122,7 @@
           figure.tabIndex=-1;
           var label=document.createElement('span');
           label.className='figure-ref';
-          label.textContent='['+image[1]+']';
+          label.textContent='['+(/^[a-z]$/.test(image[1])?image[1].toUpperCase():image[1])+']';
           var photo=document.createElement('img');
           photo.src=new URL(image[2],response.url).href;
           photo.alt=image[3]?'':image[1];
