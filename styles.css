@@ -23,6 +23,8 @@
 @media(max-width:760px){.workspace{display:flex}.rail #point-list{display:flex;align-items:stretch}.point-group{flex:0 0 auto;border-top:0;border-right:1px solid #dce0da;padding:5px 0 6px}.point-group:first-child{padding-top:5px}.group-heading{font-size:.8rem;margin:0 10px 2px}.group-roman{font-size:1rem;min-width:auto}.group-floor{font-size:.72rem;margin:0 10px 4px}.point-group .point{display:inline-flex;vertical-align:top;white-space:normal;width:175px;min-height:82px;padding:7px;flex:0 0 175px}.point-detail{font-size:.72rem}}
 /* Logotipo blanco proporcionado por la Diputación, sobre la cabecera oscura. */
 .header-end{display:flex;align-items:center;gap:22px;flex:none}
+.fhecor-logo{display:block;width:160px;height:auto}
+@media(max-width:760px){.fhecor-logo{width:clamp(62px,19vw,110px)}}
 .institution-logo{position:relative;width:215px;height:60px;overflow:hidden;flex:none}
 .institution-logo img{position:absolute;width:235px;height:auto;max-width:none;top:-34px;left:-10px;display:block}
 @media(max-width:760px){.header-end{gap:9px}.institution-logo{width:127px;height:44px}.institution-logo img{width:150px;top:-20px;left:-12px}.kicker{font-size:.63rem;letter-spacing:.06em}}
