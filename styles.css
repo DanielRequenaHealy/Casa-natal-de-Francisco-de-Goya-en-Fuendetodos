@@ -71,5 +71,5 @@
 .markdown-story blockquote { margin:18px 0 18px 39.7pt;color:#283537 }
 .markdown-story sup { line-height:0 }
 .markdown-story sup a { color:#253777 }
-.story-footnotes { border-top:1px solid #ccd1cc;margin:24px 0 0;padding:12px 0 0 1.6em;font-size:.9rem }
+.story-footnotes { border-top:1px solid #ccd1cc;margin:24px 0 0;padding:12px 0 0 1.6em;font-size:calc(1rem - 2pt) }
 .story-footnotes li { margin:0 0 .6em }
