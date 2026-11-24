@@ -200,6 +200,12 @@ window.FICHAS = [
     "markdown": "datos/fichas/07.md"
   },
   {
+    "numero": 8,
+    "titulo": "Sala",
+    "panorama": "panoramas/08.jpg",
+    "markdown": "datos/fichas/08.md"
+  },
+  {
     "numero": 9,
     "titulo": "Alcoba suroeste",
     "panorama": "panoramas/09.jpg",
