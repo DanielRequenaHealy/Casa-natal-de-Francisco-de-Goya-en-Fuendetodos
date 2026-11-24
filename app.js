@@ -26,10 +26,29 @@
     if (canvas.width !== width || canvas.height !== height) { canvas.width=width;canvas.height=height;gl.viewport(0,0,width,height); }
     gl.uniform1f(aspect,width/height); gl.uniform1f(yaw,state.yaw); gl.uniform1f(pitch,state.pitch); gl.uniform1f(fov,state.fov*Math.PI/180); gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,state.texture);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
   }
-  function rich(node, content) {
-    var chunks=String(content||'').split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[[a-zA-Z]\]|\[\d+\])/g);
+  function rich(node, content, notePrefix) {
+    var chunks=String(content||'').split(/(\[\^\d+\]|\*\*[^*]+\*\*|\*[^*]+\*|\[[a-zA-Z]\]|\[\d+\])/g);
     chunks.forEach(function (chunk) {
       if (!chunk) return;
+      var note=/^\[\^(\d+)\]$/.exec(chunk);
+      if (notePrefix&&note) {
+        var sup=document.createElement('sup');
+        var link=document.createElement('a');
+        var target=notePrefix+note[1];
+        link.href='#'+target;
+        link.textContent=note[1];
+        link.setAttribute('aria-label','Nota al pie '+note[1]);
+        link.addEventListener('click',function (event) {
+          var item=document.getElementById(target);
+          if (!item) return;
+          event.preventDefault();
+          item.focus();
+          item.scrollIntoView({block:'nearest'});
+        });
+        sup.appendChild(link);
+        node.appendChild(sup);
+        return;
+      }
       var tag = /^\*\*.*\*\*$/.test(chunk) ? 'strong' : /^\*.*\*$/.test(chunk) ? 'em' : /^\[[a-zA-Z0-9]+\]$/.test(chunk) ? 'span' : '';
       if (!tag) { node.appendChild(document.createTextNode(chunk)); return; }
       var piece=document.createElement(tag);if(tag==='span')piece.className='inline-ref';piece.textContent=tag==='strong'?chunk.slice(2,-2):tag==='em'?chunk.slice(1,-1):chunk;node.appendChild(piece);
@@ -42,7 +61,7 @@
     document.getElementById('counter').textContent=String(point.numero).padStart(2,'0')+' / '+String(points.length-1).padStart(2,'0');
     document.getElementById('example-note').hidden=point.numero===9||Boolean(point.markdown);
     if (point.markdown) {
-      loadMarkdown(point.markdown, body, document.getElementById('story-title'));
+      loadMarkdown(point, body, document.getElementById('story-title'));
       document.querySelector('.story').scrollTop=0;
       return;
     }
@@ -58,24 +77,48 @@
     });
     document.querySelector('.story').scrollTop=0;
   }
-  async function loadMarkdown(url, body, title) {
+  async function loadMarkdown(point, body, title) {
     var status=document.createElement('p');
     status.textContent='Cargando ficha documental…';
     body.appendChild(status);
     try {
-      var response=await fetch(url);
+      var response=await fetch(point.markdown);
       if (!response.ok) throw Error(response.status);
       var markdown=await response.text();
       if (status.parentNode!==body) return;
-      var paragraphs=markdown.trim().split(/\r?\n[ \t]*\r?\n/);
+      var paragraphs=markdown.replace(/\r\n/g,'\n').trimEnd().split(/\n[ \t]*\n/);
       if (paragraphs[0].startsWith('# ')) title.textContent=paragraphs.shift().slice(2);
-      body.replaceChildren();
+      var content=document.createElement('article');
+      content.className='markdown-story';
+      var notes=document.createElement('ol');
+      notes.className='story-footnotes';
+      notes.setAttribute('aria-label','Notas al pie');
+      var notePrefix='ficha-'+point.numero+'-nota-';
       paragraphs.forEach(function (paragraph) {
+        var definition=/^\[\^(\d+)\]:\s+([\s\S]+)$/.exec(paragraph);
+        if (definition) {
+          var item=document.createElement('li');
+          item.id=notePrefix+definition[1];
+          item.value=Number(definition[1]);
+          item.tabIndex=-1;
+          rich(item,definition[2]);
+          notes.appendChild(item);
+          return;
+        }
         var heading=paragraph.startsWith('## ');
-        var element=document.createElement(heading?'h3':'p');
-        rich(element,(heading?paragraph.slice(3):paragraph).replace(/\r?\n/g,' '));
-        body.appendChild(element);
+        var quote=paragraph.startsWith('> ');
+        var indent=paragraph.startsWith('\t');
+        var author=paragraph.startsWith('<!-- autoría -->\n');
+        var element=document.createElement(heading?'h3':quote?'blockquote':'p');
+        if (indent) element.className='story-indent';
+        if (author) element.className='story-author';
+        var text=author?paragraph.slice('<!-- autoría -->\n'.length):
+          heading?paragraph.slice(3):quote?paragraph.slice(2):indent?paragraph.slice(1):paragraph;
+        rich(element,text.replace(/\r?\n/g,' '),notePrefix);
+        content.appendChild(element);
       });
+      if (notes.childElementCount) content.appendChild(notes);
+      body.replaceChildren(content);
     } catch (error) {
       status.textContent='No se ha podido cargar la ficha documental.';
     }
