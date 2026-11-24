@@ -52,6 +52,23 @@
         node.appendChild(sup);
         return;
       }
+      var pointReference=/^\[ver ámbito (\d{1,2})\]$/i.exec(chunk);
+      var pointIndex=pointReference?points.findIndex(function (point) {
+        return point.numero===Number(pointReference[1]);
+      }): -1;
+      if (pointIndex>=0) {
+        var pointLink=document.createElement('a');
+        pointLink.href='#p'+String(points[pointIndex].numero).padStart(2,'0');
+        pointLink.textContent=chunk;
+        pointLink.className='inline-ref';
+        pointLink.addEventListener('click',function (event) {
+          if (event.ctrlKey||event.metaKey||event.shiftKey||event.altKey) return;
+          event.preventDefault();
+          select(pointIndex);
+        });
+        node.appendChild(pointLink);
+        return;
+      }
       var target=figures&&figures.get(chunk.toUpperCase());
       if (target) {
         var reference=storyLink(/^\[[a-z]\]$/.test(chunk)?chunk.toUpperCase():chunk,target);
