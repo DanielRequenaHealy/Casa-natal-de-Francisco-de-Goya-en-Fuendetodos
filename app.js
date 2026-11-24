@@ -40,7 +40,12 @@
     document.getElementById('story-title').textContent=point.titulo;
     document.getElementById('point-number').textContent=String(point.numero).padStart(2,'0');
     document.getElementById('counter').textContent=String(point.numero).padStart(2,'0')+' / '+String(points.length-1).padStart(2,'0');
-    document.getElementById('example-note').hidden=point.numero===9;
+    document.getElementById('example-note').hidden=point.numero===9||Boolean(point.markdown);
+    if (point.markdown) {
+      loadMarkdown(point.markdown, body, document.getElementById('story-title'));
+      document.querySelector('.story').scrollTop=0;
+      return;
+    }
     (point.bloques||[]).forEach(function (block) {
       if (block.tipo==='texto'||block.tipo==='subtitulo') { var el=document.createElement(block.tipo==='texto'?'p':'h3');rich(el,block.texto);body.appendChild(el); }
       else if(block.tipo==='imagen') {
@@ -52,6 +57,28 @@
       }
     });
     document.querySelector('.story').scrollTop=0;
+  }
+  async function loadMarkdown(url, body, title) {
+    var status=document.createElement('p');
+    status.textContent='Cargando ficha documental…';
+    body.appendChild(status);
+    try {
+      var response=await fetch(url);
+      if (!response.ok) throw Error(response.status);
+      var markdown=await response.text();
+      if (status.parentNode!==body) return;
+      var paragraphs=markdown.trim().split(/\r?\n[ \t]*\r?\n/);
+      if (paragraphs[0].startsWith('# ')) title.textContent=paragraphs.shift().slice(2);
+      body.replaceChildren();
+      paragraphs.forEach(function (paragraph) {
+        var heading=paragraph.startsWith('## ');
+        var element=document.createElement(heading?'h3':'p');
+        rich(element,(heading?paragraph.slice(3):paragraph).replace(/\r?\n/g,' '));
+        body.appendChild(element);
+      });
+    } catch (error) {
+      status.textContent='No se ha podido cargar la ficha documental.';
+    }
   }
   async function imageDimensions(blob) {
     // Leer la cabecera evita decodificar la imagen antes de solicitar el tamaño adecuado.
