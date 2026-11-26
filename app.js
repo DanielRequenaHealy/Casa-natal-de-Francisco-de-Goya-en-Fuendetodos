@@ -123,7 +123,7 @@
       var notePrefix='ficha-'+point.numero+'-nota-';
       var figures=new Map();
       var images=paragraphs.map(function (paragraph) {
-        var image=/^!\[([^\]]+)\]\((\.\.\/\.\.\/fotos\/[\w.-]+)?\)(?:\n([\s\S]+))?$/.exec(paragraph);
+        var image=/^!\[([^\]]+)\]\((\.\.\/\.\.\/fotos\/[\w.-]+)?\)((?:\n!\[\1\]\(\.\.\/\.\.\/fotos\/[\w.-]+\))*)(?:\n([\s\S]+))?$/.exec(paragraph);
         if (image) figures.set('['+image[1].toUpperCase()+']','ficha-'+point.numero+'-figura-'+figures.size);
         return image;
       });
@@ -131,27 +131,39 @@
         title.replaceChildren();
         rich(title,headingText,notePrefix,figures);
       }
+      var textContainer=content;
       paragraphs.forEach(function (paragraph,index) {
+        if (paragraph==='<!-- texto de la figura -->') {
+          if (content.lastElementChild?.tagName==='FIGURE') textContainer=content.lastElementChild;
+          return;
+        }
         var image=images[index];
         if (image) {
+          textContainer=content;
           var figure=document.createElement('figure');
           figure.id=figures.get('['+image[1].toUpperCase()+']');
           figure.tabIndex=-1;
           var label=document.createElement('span');
           label.className='figure-ref';
           label.textContent='['+(/^[a-z]$/.test(image[1])?image[1].toUpperCase():image[1])+']';
-          var photo=document.createElement(image[2]?'img':'div');
-          if (image[2]) {
-            photo.src=new URL(image[2],response.url).href;
-            photo.alt=image[3]?'':image[1];
-            photo.loading='lazy';
-          } else {
-            photo.className='photo';
-            photo.textContent='Imagen pendiente';
-          }
+          figure.appendChild(label);
+          var paths=[image[2]];
+          for (var additional of image[3].matchAll(/\]\(([^)]+)\)/g)) paths.push(additional[1]);
+          paths.forEach(function (path) {
+            var photo=document.createElement(path?'img':'div');
+            if (path) {
+              photo.src=new URL(path,response.url).href;
+              photo.alt=image[4]?'':image[1];
+              photo.loading='lazy';
+            } else {
+              photo.className='photo';
+              photo.textContent='Imagen pendiente';
+            }
+            figure.appendChild(photo);
+          });
           var caption=document.createElement('figcaption');
-          rich(caption,image[3]);
-          figure.append(label,photo,caption);
+          rich(caption,image[4]);
+          figure.appendChild(caption);
           content.appendChild(figure);
           return;
         }
@@ -175,7 +187,7 @@
         var text=author?paragraph.slice('<!-- autoría -->\n'.length):
           heading?paragraph.slice(3):quote?paragraph.slice(2):indent?paragraph.slice(1):paragraph;
         rich(element,quote?text.replace(/\n> /g,'\n'):text.replace(/\n/g,' '),notePrefix,figures);
-        content.appendChild(element);
+        textContainer.appendChild(element);
       });
       if (notes.childElementCount) content.appendChild(notes);
       body.replaceChildren(content);
