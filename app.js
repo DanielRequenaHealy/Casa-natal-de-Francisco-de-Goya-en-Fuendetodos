@@ -221,7 +221,9 @@
           label.className='figure-ref';
           label.textContent='['+(/^[a-z]$/.test(image[1])?image[1].toUpperCase():image[1])+']';
           if (planName) {
-            label.hidden=true;
+            label.hidden=!paragraphs.some(function (text,i) {
+              return !images[i]&&text.includes(label.textContent);
+            });
             var planLabel=document.createElement('div');
             planLabel.className='document-plan-name';
             planLabel.textContent=planName;
