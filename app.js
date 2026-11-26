@@ -249,7 +249,6 @@
         var indent=paragraph.startsWith('\t');
         var author=paragraph.startsWith('<!-- autoría -->\n');
         var element=document.createElement(heading?'h3':quote?'blockquote':'p');
-        if (indent) element.className='story-indent';
         if (author) element.className='story-author';
         var text=author?paragraph.slice('<!-- autoría -->\n'.length):
           heading?paragraph.slice(3):quote?paragraph.slice(2):indent?paragraph.slice(1):paragraph;

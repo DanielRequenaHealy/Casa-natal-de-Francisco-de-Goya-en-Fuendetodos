@@ -73,8 +73,6 @@
 }
 .markdown-story p,.markdown-story blockquote { text-align:justify;white-space:pre-wrap }
 .markdown-story .story-author { text-align:right }
-.markdown-story .story-indent { text-indent:35.4pt }
-.markdown-story .story-author + .story-indent { text-indent:36.85pt }
 .markdown-story blockquote { margin:18px 0 18px 39.7pt;color:#283537 }
 .markdown-story sup { line-height:0 }
 .markdown-story sup a { color:#253777 }
