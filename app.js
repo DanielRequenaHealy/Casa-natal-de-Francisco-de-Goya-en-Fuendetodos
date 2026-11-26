@@ -81,6 +81,57 @@
       var piece=document.createElement(tag);if(tag==='span')piece.className='inline-ref';piece.textContent=tag==='span'?chunk.toUpperCase():chunk.slice(tag==='strong'?2:1,tag==='strong'?-2:-1);node.appendChild(piece);
     });
   }
+  var photoDialog=document.getElementById('photo-dialog');
+  var enlargedPhoto=document.getElementById('enlarged-photo');
+  var photoCaption=document.getElementById('enlarged-caption');
+  var photoPosition=document.getElementById('photo-position');
+  var photoPrevious=document.getElementById('photo-previous');
+  var photoNext=document.getElementById('photo-next');
+  var photoItems=[];
+  var photoIndex=0;
+  var photoOpener;
+
+  function showPhoto(index) {
+    if (index<0||index>=photoItems.length) return;
+    photoIndex=index;
+    var item=photoItems[index];
+    var figure=item.closest('figure');
+    var caption=figure.querySelector('figcaption');
+    var reference=figure.querySelector('.figure-ref');
+    enlargedPhoto.src=item.querySelector('img').src;
+    enlargedPhoto.alt=caption?.textContent||item.querySelector('img').alt;
+    photoCaption.replaceChildren();
+    if (reference) photoCaption.append(reference.textContent+' ');
+    if (caption) photoCaption.append(...Array.from(caption.cloneNode(true).childNodes));
+    photoPosition.textContent=(index+1)+' / '+photoItems.length;
+    photoPrevious.setAttribute('aria-disabled',String(index===0));
+    photoNext.setAttribute('aria-disabled',String(index===photoItems.length-1));
+  }
+  function photoButton(photo, reference) {
+    var button=document.createElement('button');
+    button.type='button';
+    button.className='enlarge-photo';
+    button.setAttribute('aria-label','Ampliar imagen'+(reference?' ['+reference+']':''));
+    button.appendChild(photo);
+    button.addEventListener('click',function () {
+      photoItems=Array.from(document.querySelectorAll('#story-body .enlarge-photo'));
+      photoOpener=button;
+      showPhoto(photoItems.indexOf(button));
+      photoDialog.showModal();
+    });
+    return button;
+  }
+  photoPrevious.addEventListener('click',function () { showPhoto(photoIndex-1); });
+  photoNext.addEventListener('click',function () { showPhoto(photoIndex+1); });
+  photoDialog.addEventListener('keydown',function (event) {
+    if (event.key!=='ArrowLeft'&&event.key!=='ArrowRight') return;
+    event.preventDefault();
+    showPhoto(photoIndex+(event.key==='ArrowLeft'?-1:1));
+  });
+  photoDialog.addEventListener('close',function () {
+    enlargedPhoto.removeAttribute('src');
+    photoOpener?.focus({preventScroll:true});
+  });
   function renderContent(point) {
     var body=document.getElementById('story-body');body.replaceChildren();
     document.getElementById('story-title').textContent=point.titulo;
@@ -98,7 +149,7 @@
         var fig=document.createElement('figure');if(block.referencia){var ref=document.createElement('span');ref.className='figure-ref';ref.textContent='['+String(block.referencia).toUpperCase()+']';fig.appendChild(ref);}
         if(block.codigo){var code=document.createElement('div');code.className='file-ref';code.textContent='['+block.codigo+']';fig.appendChild(code);}
         var visual=document.createElement('div');visual.className='photo';visual.textContent='Imagen pendiente · '+(block.codigo||'');
-        if(block.url){var img=new Image();img.alt=block.pie||'Documento gráfico';img.loading='lazy';img.onload=function(){visual.replaceChildren(img);};img.src=block.url;}
+        if(block.url){var img=new Image();img.alt=block.pie||'Documento gráfico';img.loading='lazy';img.onload=function(){visual.replaceChildren(photoButton(img,block.referencia));};img.src=block.url;}
         fig.appendChild(visual);if(block.pie){var caption=document.createElement('figcaption');rich(caption,block.pie);fig.appendChild(caption);}body.appendChild(fig);
       }
     });
@@ -156,7 +207,7 @@
               photo.className='photo';
               photo.textContent='Imagen pendiente';
             }
-            figure.appendChild(photo);
+            figure.appendChild(path?photoButton(photo,image[1]):photo);
           });
           var caption=document.createElement('figcaption');
           rich(caption,image[4]);
