@@ -74,5 +74,9 @@
 .markdown-story sup { line-height:0 }
 .markdown-story sup a { color:#253777 }
 .markdown-story figure img { display:block;width:100%;height:auto;max-height:430px;object-fit:contain }
+.figure-document { margin-top:16px;padding:clamp(12px,3vw,20px);border-left:3px solid #b78b51;background:#eee9df }
+.figure-document h3:first-child { margin-top:0 }
+.figure-document p:last-child { margin-bottom:0 }
+.markdown-story .figure-document blockquote { margin:16px 0;padding:12px;border-left:2px solid #b78b51;background:#f6f4ef;text-align:left }
 .story-footnotes { border-top:1px solid #ccd1cc;margin:24px 0 0;padding:12px 0 0 1.6em;font-size:calc(1rem - 2pt) }
 .story-footnotes li { margin:0 0 .6em }
