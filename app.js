@@ -6,15 +6,14 @@
   var loading = document.getElementById('loading');
   var cameraPlan = document.getElementById('camera-plan');
   var cameraPlanImage = document.getElementById('camera-plan-image');
-  var mapInteractive=new URLSearchParams(location.search).get('plano')!=='clasico';
   var mapCone;
   var mapHeading;
   var mapMarkers={
     2:[41,40.8],3:[70,42.6],4:[42.3,17.2],5:[67.7,20.6],
     6:[19,47.6],7:[47.3,12.7],8:[40.2,37],9:[62,45],10:[58.7,30.2],
-    11:[18.7,42.4],12:[42,38]
+    11:[18.4,42.3],12:[21.7,26.2]
   };
-  var mapHeadings={2:3,3:93,4:275,5:0,6:65,7:90,8:86,9:90,10:90,11:74,12:85};
+  var mapHeadings={2:3,3:0,4:275,5:22,6:0,7:90,8:86,9:90,10:90,11:74,12:85};
   var mapFloors=[
     {rooms:[2,3,4,5],arrival:2,label:'Planta baja',top:85.6,height:11},
     {rooms:[6,7,8,9,10],arrival:8,label:'Planta primera',top:73.5,height:12.1},
@@ -334,21 +333,10 @@
     cameraPlan.replaceChildren();cameraPlanImage=image;
     var currentFloor=mapFloors.find(function (floor) { return floor.rooms.includes(point.numero); });
     if (currentFloor) {
-      var toggle=document.createElement('button');
-      toggle.type='button';
-      toggle.className='map-toggle';
-      toggle.textContent='Mapa interactivo';
-      toggle.setAttribute('aria-pressed',String(mapInteractive));
-      toggle.addEventListener('click',function () {
-        mapInteractive=!mapInteractive;
-        toggle.setAttribute('aria-pressed',String(mapInteractive));
-        controls.hidden=!mapInteractive;
-      });
       var frame=document.createElement('div');
       frame.className='map-frame';
       var controls=document.createElement('div');
       controls.className='map-controls';
-      controls.hidden=!mapInteractive;
       currentFloor.rooms.forEach(function (number) {
         var target=points.findIndex(function (room) { return room.numero===number; });
         if (target<0) return;
@@ -381,13 +369,13 @@
         controls.appendChild(button);
       });
       frame.append(image,controls);
-      cameraPlan.append(toggle,frame);
+      cameraPlan.appendChild(frame);
     } else {
       cameraPlan.appendChild(image);
     }
     image.onload=function(){if(cameraPlanImage===image)cameraPlan.hidden=false;};
     image.onerror=function(){if(cameraPlanImage===image)cameraPlan.hidden=true;};
-    image.src=path;
+    image.src=point.numero===11||point.numero===12?path+'?v=2':path;
   }
   function mapButton(index,label) {
     var button=document.createElement('button');
@@ -494,7 +482,7 @@
   var workspace=document.querySelector('.workspace');var resizer=document.getElementById('panel-resizer');
   var savedWidth=Number(localStorage.getItem('goya-story-width'));
   function setStoryWidth(width,remember){
-    if(window.innerWidth<=760)return;
+    if(window.innerWidth<=900)return;
     var rail=window.innerWidth<=1060?220:280;
     var available=workspace.clientWidth-rail-10-(window.innerWidth<=1060?250:320);
     var adjusted=Math.max(300,Math.min(width,available));
