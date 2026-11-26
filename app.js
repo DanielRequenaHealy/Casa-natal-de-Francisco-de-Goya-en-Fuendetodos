@@ -133,10 +133,7 @@
       }
       var textContainer=content;
       paragraphs.forEach(function (paragraph,index) {
-        if (paragraph==='<!-- texto de la figura -->') {
-          if (content.lastElementChild?.tagName==='FIGURE') textContainer=content.lastElementChild;
-          return;
-        }
+        if (/^<!-- [\s\S]+ -->$/.test(paragraph)) return;
         var image=images[index];
         if (image) {
           textContainer=content;
@@ -154,7 +151,7 @@
             if (path) {
               photo.src=new URL(path,response.url).href;
               photo.alt=image[4]?'':image[1];
-              photo.loading='lazy';
+              photo.loading=paths.length>1?'eager':'lazy';
             } else {
               photo.className='photo';
               photo.textContent='Imagen pendiente';
@@ -164,6 +161,11 @@
           var caption=document.createElement('figcaption');
           rich(caption,image[4]);
           figure.appendChild(caption);
+          if (point.figuraConTexto===image[1]) {
+            textContainer=document.createElement('section');
+            textContainer.className='figure-document';
+            figure.appendChild(textContainer);
+          }
           content.appendChild(figure);
           return;
         }
