@@ -197,17 +197,36 @@
         rich(title,headingText,notePrefix,figures);
       }
       var textContainer=content;
+      var planGrid;
       paragraphs.forEach(function (paragraph,index) {
         if (/^<!-- [\s\S]+ -->$/.test(paragraph)) return;
         var image=images[index];
         if (image) {
           textContainer=content;
+          var planName=point.planosDocumentales?.[image[1]];
+          if (planName&&!planGrid) {
+            var planSection=document.createElement('section');
+            planSection.className='document-plans';
+            var planTitle=document.createElement('h3');
+            planTitle.textContent='Planos y vistas';
+            planGrid=document.createElement('div');
+            planGrid.className='document-plan-grid';
+            planSection.append(planTitle,planGrid);
+            content.appendChild(planSection);
+          }
           var figure=document.createElement('figure');
           figure.id=figures.get('['+image[1].toUpperCase()+']');
           figure.tabIndex=-1;
           var label=document.createElement('span');
           label.className='figure-ref';
           label.textContent='['+(/^[a-z]$/.test(image[1])?image[1].toUpperCase():image[1])+']';
+          if (planName) {
+            label.hidden=true;
+            var planLabel=document.createElement('div');
+            planLabel.className='document-plan-name';
+            planLabel.textContent=planName;
+            figure.appendChild(planLabel);
+          }
           figure.appendChild(label);
           var paths=[image[2]];
           for (var additional of image[3].matchAll(/\]\(([^)]+)\)/g)) paths.push(additional[1]);
@@ -221,17 +240,24 @@
               photo.className='photo';
               photo.textContent='Imagen pendiente';
             }
-            figure.appendChild(path?photoButton(photo,image[1]):photo);
+            if (path) {
+              var button=photoButton(photo,image[1]);
+              if (planName) button.setAttribute('aria-label','Ampliar '+planName.toLowerCase());
+              figure.appendChild(button);
+            } else {
+              figure.appendChild(photo);
+            }
           });
           var caption=document.createElement('figcaption');
           rich(caption,image[4]);
+          caption.hidden=Boolean(planName);
           figure.appendChild(caption);
           if (point.figuraConTexto===image[1]) {
             textContainer=document.createElement('section');
             textContainer.className='figure-document';
             figure.appendChild(textContainer);
           }
-          content.appendChild(figure);
+          (planName?planGrid:content).appendChild(figure);
           return;
         }
         var definition=/^\[\^(\d+)\]:\s+([\s\S]+)$/.exec(paragraph);

@@ -58,6 +58,7 @@ window.FICHAS = [
     "titulo": "Alcoba suroeste",
     "panorama": "panoramas/09.jpg",
     "markdown": "datos/fichas/09.md",
+    "planosDocumentales": {"A": "Planta axonométrica", "B": "Dibujo de planta"},
     "figuraConTexto": "7",
     "detalle": "habitación donde presuntamente nació Francisco de Goya y Lucientes"
   },
