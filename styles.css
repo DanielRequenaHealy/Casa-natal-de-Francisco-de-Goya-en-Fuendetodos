@@ -101,10 +101,11 @@
 .map-toggle[aria-pressed=false] { background:#132b31aa }
 .map-room,.map-floor { position:absolute;padding:0;background:transparent;border:1px solid transparent }
 .map-room { width:32px;height:32px;translate:-50% -50%;border-radius:50% }
-.map-floor { left:7%;width:83%;height:11%;border-radius:3px }
+.map-floor { left:7%;width:83%;border-radius:3px }
 .map-room:hover,.map-floor:hover,.map-room:focus-visible,.map-floor:focus-visible { border-color:#704128;background:#bd76432b;outline:2px solid white }
-.map-cone { position:absolute;width:34px;height:34px;translate:-50% -50%;background:conic-gradient(from -29deg,#28788b 0deg 58deg,transparent 58deg);pointer-events:none }
+.map-cone { position:absolute;width:50px;height:50px;translate:-50% -50%;background:conic-gradient(from -29deg,#d77a9ac9 0deg 58deg,transparent 58deg);mask-image:radial-gradient(circle,transparent 0 11px,#000 12px 24px,transparent 25px);pointer-events:none }
 @media(max-width:760px){
   .map-frame img{max-height:min(222px,calc(49dvh - 38px))}
   .map-room{width:28px;height:28px}
+  .map-cone{width:40px;height:40px;mask-image:radial-gradient(circle,transparent 0 8px,#000 9px 19px,transparent 20px)}
 }

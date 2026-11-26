@@ -11,9 +11,15 @@
   var mapHeading;
   var mapMarkers={
     2:[41,40.8],3:[70,42.6],4:[42.3,17.2],5:[67.7,20.6],
-    6:[19,47.6],7:[47.3,12.7],8:[40.2,37],9:[62,45],10:[58.7,30.2]
+    6:[19,47.6],7:[47.3,12.7],8:[40.2,37],9:[62,45],10:[58.7,30.2],
+    11:[18.7,42.4],12:[42,38]
   };
-  var mapHeadings={2:3,6:65,8:86};
+  var mapHeadings={2:3,3:93,4:275,5:0,6:65,7:90,8:86,9:90,10:90,11:74,12:85};
+  var mapFloors=[
+    {rooms:[2,3,4,5],arrival:2,label:'Planta baja',top:85.6,height:11},
+    {rooms:[6,7,8,9,10],arrival:8,label:'Planta primera',top:73.5,height:12.1},
+    {rooms:[11,12],arrival:12,label:'Falsa',top:65.8,height:7.7}
+  ];
   var gl = canvas.getContext('webgl', { antialias: false });
   var state = { yaw: 0, pitch: 0, fov: 75, index: 0, texture: null, dragging: false, x: 0, y: 0, request: 0 };
   var program, position, uv, aspect, yaw, pitch, fov, texture;
@@ -326,7 +332,8 @@
     image.alt='Plano de ubicación de la cámara '+String(point.numero).padStart(2,'0');
     mapCone=null;
     cameraPlan.replaceChildren();cameraPlanImage=image;
-    if (mapMarkers[point.numero]) {
+    var currentFloor=mapFloors.find(function (floor) { return floor.rooms.includes(point.numero); });
+    if (currentFloor) {
       var toggle=document.createElement('button');
       toggle.type='button';
       toggle.className='map-toggle';
@@ -342,9 +349,7 @@
       var controls=document.createElement('div');
       controls.className='map-controls';
       controls.hidden=!mapInteractive;
-      var firstFloor=point.numero>=6;
-      var rooms=firstFloor?[6,7,8,9,10]:[2,3,4,5];
-      rooms.forEach(function (number) {
+      currentFloor.rooms.forEach(function (number) {
         var target=points.findIndex(function (room) { return room.numero===number; });
         if (target<0) return;
         var coordinates=mapMarkers[number];
@@ -365,13 +370,14 @@
         if (number===point.numero) button.setAttribute('aria-current','location');
         controls.appendChild(button);
       });
-      [[8,'Planta primera',73.5],[2,'Planta baja',85.6]].forEach(function (floor) {
-        var target=points.findIndex(function (room) { return room.numero===floor[0]; });
+      mapFloors.forEach(function (floor) {
+        var target=points.findIndex(function (room) { return room.numero===floor.arrival; });
         if (target<0) return;
-        var button=mapButton(target,floor[1]);
+        var button=mapButton(target,floor.label);
         button.className='map-floor';
-        button.style.top=floor[2]+'%';
-        if ((floor[0]===8)===firstFloor) button.setAttribute('aria-current','location');
+        button.style.top=floor.top+'%';
+        button.style.height=floor.height+'%';
+        if (floor===currentFloor) button.setAttribute('aria-current','location');
         controls.appendChild(button);
       });
       frame.append(image,controls);
