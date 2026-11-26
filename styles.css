@@ -91,3 +91,20 @@
 .photo-dialog button[aria-disabled=true] { opacity:.45;cursor:default }
 .photo-dialog-nav { position:sticky;bottom:0;background:#f6f4ef }
 @media(max-width:600px){.photo-dialog img{max-height:55dvh}}
+.camera-plan:has(.map-frame) { flex-direction:column;gap:4px }
+.map-frame { position:relative;max-width:100% }
+.map-frame img { max-height:min(calc(76vh - 38px),462px) }
+.map-controls { position:absolute;inset:0 }
+.map-controls[hidden] { display:none }
+.map-toggle,.map-room,.map-floor { pointer-events:auto;cursor:pointer }
+.map-toggle { min-height:34px;padding:4px 9px;border:1px solid #ffffff75;border-radius:5px;background:#132b31;color:white;font-size:.75rem }
+.map-toggle[aria-pressed=false] { background:#132b31aa }
+.map-room,.map-floor { position:absolute;padding:0;background:transparent;border:1px solid transparent }
+.map-room { width:32px;height:32px;translate:-50% -50%;border-radius:50% }
+.map-floor { left:7%;width:83%;height:11%;border-radius:3px }
+.map-room:hover,.map-floor:hover,.map-room:focus-visible,.map-floor:focus-visible { border-color:#704128;background:#bd76432b;outline:2px solid white }
+.map-cone { position:absolute;width:34px;height:34px;translate:-50% -50%;background:conic-gradient(from -29deg,#28788b 0deg 58deg,transparent 58deg);pointer-events:none }
+@media(max-width:760px){
+  .map-frame img{max-height:min(222px,calc(49dvh - 38px))}
+  .map-room{width:28px;height:28px}
+}

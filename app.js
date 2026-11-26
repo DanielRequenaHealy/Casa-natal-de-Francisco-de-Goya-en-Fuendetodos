@@ -6,6 +6,14 @@
   var loading = document.getElementById('loading');
   var cameraPlan = document.getElementById('camera-plan');
   var cameraPlanImage = document.getElementById('camera-plan-image');
+  var mapInteractive=new URLSearchParams(location.search).get('plano')!=='clasico';
+  var mapCone;
+  var mapHeading;
+  var mapMarkers={
+    2:[41,40.8],3:[70,42.6],4:[42.3,17.2],5:[67.7,20.6],
+    6:[19,47.6],7:[47.3,12.7],8:[40.2,37],9:[62,45],10:[58.7,30.2]
+  };
+  var mapHeadings={2:3,6:65,8:86};
   var gl = canvas.getContext('webgl', { antialias: false });
   var state = { yaw: 0, pitch: 0, fov: 75, index: 0, texture: null, dragging: false, x: 0, y: 0, request: 0 };
   var program, position, uv, aspect, yaw, pitch, fov, texture;
@@ -21,6 +29,7 @@
     } catch (e) { gl = null; }
   }
   function draw() {
+    updateMapHeading();
     if (!gl || !state.texture) return;
     var width = Math.max(1,Math.round(canvas.clientWidth*devicePixelRatio)); var height = Math.max(1,Math.round(canvas.clientHeight*devicePixelRatio));
     if (canvas.width !== width || canvas.height !== height) { canvas.width=width;canvas.height=height;gl.viewport(0,0,width,height); }
@@ -273,6 +282,7 @@
   async function loadPanorama(point) {
     if(state.abort)state.abort.abort();state.abort=new AbortController();
     state.request+=1;var current=state.request;state.yaw=0;state.pitch=0;state.fov=75;
+    updateMapHeading();
     if(state.texture&&gl){gl.deleteTexture(state.texture);state.texture=null;}
     missing.hidden=true;loading.hidden=false;
     document.getElementById('missing-name').textContent=point.titulo;
@@ -314,10 +324,75 @@
     cameraPlan.hidden=true;
     var image=new Image();
     image.alt='Plano de ubicación de la cámara '+String(point.numero).padStart(2,'0');
-    cameraPlan.replaceChildren(image);cameraPlanImage=image;
+    mapCone=null;
+    cameraPlan.replaceChildren();cameraPlanImage=image;
+    if (mapMarkers[point.numero]) {
+      var toggle=document.createElement('button');
+      toggle.type='button';
+      toggle.className='map-toggle';
+      toggle.textContent='Mapa interactivo';
+      toggle.setAttribute('aria-pressed',String(mapInteractive));
+      toggle.addEventListener('click',function () {
+        mapInteractive=!mapInteractive;
+        toggle.setAttribute('aria-pressed',String(mapInteractive));
+        controls.hidden=!mapInteractive;
+      });
+      var frame=document.createElement('div');
+      frame.className='map-frame';
+      var controls=document.createElement('div');
+      controls.className='map-controls';
+      controls.hidden=!mapInteractive;
+      var firstFloor=point.numero>=6;
+      var rooms=firstFloor?[6,7,8,9,10]:[2,3,4,5];
+      rooms.forEach(function (number) {
+        var target=points.findIndex(function (room) { return room.numero===number; });
+        if (target<0) return;
+        var coordinates=mapMarkers[number];
+        if (number===point.numero&&Object.hasOwn(mapHeadings,number)) {
+          mapCone=document.createElement('span');
+          mapCone.className='map-cone';
+          mapCone.setAttribute('aria-hidden','true');
+          mapCone.style.left=coordinates[0]+'%';
+          mapCone.style.top=coordinates[1]+'%';
+          mapHeading=mapHeadings[number];
+          controls.appendChild(mapCone);
+          updateMapHeading();
+        }
+        var button=mapButton(target,points[target].titulo);
+        button.className='map-room';
+        button.style.left=coordinates[0]+'%';
+        button.style.top=coordinates[1]+'%';
+        if (number===point.numero) button.setAttribute('aria-current','location');
+        controls.appendChild(button);
+      });
+      [[8,'Planta primera',73.5],[2,'Planta baja',85.6]].forEach(function (floor) {
+        var target=points.findIndex(function (room) { return room.numero===floor[0]; });
+        if (target<0) return;
+        var button=mapButton(target,floor[1]);
+        button.className='map-floor';
+        button.style.top=floor[2]+'%';
+        if ((floor[0]===8)===firstFloor) button.setAttribute('aria-current','location');
+        controls.appendChild(button);
+      });
+      frame.append(image,controls);
+      cameraPlan.append(toggle,frame);
+    } else {
+      cameraPlan.appendChild(image);
+    }
     image.onload=function(){if(cameraPlanImage===image)cameraPlan.hidden=false;};
     image.onerror=function(){if(cameraPlanImage===image)cameraPlan.hidden=true;};
     image.src=path;
+  }
+  function mapButton(index,label) {
+    var button=document.createElement('button');
+    button.type='button';
+    button.setAttribute('aria-label',label);
+    button.title=label;
+    button.addEventListener('click',function () { select(index); });
+    return button;
+  }
+  function updateMapHeading() {
+    if (mapCone) mapCone.style.rotate=(mapHeading+state.yaw*180/Math.PI)+'deg';
   }
   function select(i){
     var item=points[i];if(!item)return;
