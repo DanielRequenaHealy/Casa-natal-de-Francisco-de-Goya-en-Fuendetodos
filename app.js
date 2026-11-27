@@ -90,7 +90,7 @@
         node.appendChild(sup);
         return;
       }
-      var pointReference=/^\[ver ámbito (\d{1,2})\]$/i.exec(chunk);
+      var pointReference=/^\[(?:ver ámbito|see area) (\d{1,2})\]$/i.exec(chunk);
       var pointIndex=pointReference?points.findIndex(function (point) {
         return point.numero===Number(pointReference[1]);
       }): -1;
@@ -561,7 +561,7 @@
   function stopResize(){resizer.classList.remove('dragging');}resizer.addEventListener('pointerup',stopResize);resizer.addEventListener('pointercancel',stopResize);
   resizer.addEventListener('keydown',function(event){if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return;event.preventDefault();var width=parseFloat(getComputedStyle(workspace).getPropertyValue('--story-width'))||440;setStoryWidth(width+(event.key==='ArrowLeft'?20:-20),true);});
   window.addEventListener('resize',function(){var current=Number(localStorage.getItem('goya-story-width'))||440;setStoryWidth(current,false);});
-  var languagePicker=document.getElementById('visit-language');
+  var languageButtons=document.querySelectorAll('#visit-language button');
   var textLabels=[
     ['.kicker','FUENDETODOS · VISITA VIRTUAL','FUENDETODOS · VIRTUAL TOUR'],
     ['header h1','Casa natal de Goya','Goya’s birthplace'],
@@ -593,7 +593,9 @@
     language=value==='en'?'en':'es';
     document.documentElement.lang=language;
     document.title=language==='en'?'Virtual tour · Goya’s birthplace':'Visita panorámica · Casa natal de Goya';
-    languagePicker.value=language;
+    languageButtons.forEach(function (button) {
+      button.setAttribute('aria-pressed',String(button.value===language));
+    });
     textLabels.forEach(function ([selector,es,en]) {
       document.querySelector(selector).firstChild.nodeValue=language==='en'?en:es;
     });
@@ -609,7 +611,11 @@
       if (!missing.hidden) document.getElementById('missing-help').textContent=translate(state.panoramaError);
     }
   }
-  languagePicker.addEventListener('change',function () { applyLanguage(languagePicker.value); });
+  languageButtons.forEach(function (button) {
+    button.addEventListener('click',function () {
+      if (button.value!==language) applyLanguage(button.value);
+    });
+  });
   applyLanguage('es');
   var matched=location.hash.match(/^#p(\d{1,2})$/);var number=matched?Number(matched[1]):0;var initialIndex=points.findIndex(function(point){return point.numero===number;});select(initialIndex>=0?initialIndex:0);
 })();

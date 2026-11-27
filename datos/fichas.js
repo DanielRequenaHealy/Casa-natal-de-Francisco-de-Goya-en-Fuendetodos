@@ -3,63 +3,72 @@ window.FICHAS = [
     "numero": 0,
     "titulo": "La casa natal de Francisco de Goya y Lucientes",
     "panorama": "panoramas/00.jpg",
-    "markdown": "datos/fichas/00.md"
+    "markdown": "datos/fichas/00.md",
+    "markdownEn": "datos/fichas/00.en.md"
   },
   {
     "numero": 1,
     "titulo": "Fachada oeste a la calle Alfóndiga",
     "panorama": "panoramas/01.jpg",
     "planosDocumentales": {"A":"Vista axonométrica de la fachada","B":"Alzado en blanco y negro","C":"Alzado en color","D":"Alzado de 1982"},
-    "markdown": "datos/fichas/01.md"
+    "markdown": "datos/fichas/01.md",
+    "markdownEn": "datos/fichas/01.en.md"
   },
   {
     "numero": 2,
     "titulo": "Zaguán y fresquera",
     "panorama": "panoramas/02.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
-    "markdown": "datos/fichas/02.md"
+    "markdown": "datos/fichas/02.md",
+    "markdownEn": "datos/fichas/02.en.md"
   },
   {
     "numero": 3,
     "titulo": "Cuadra",
     "panorama": "panoramas/03.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
-    "markdown": "datos/fichas/03.md"
+    "markdown": "datos/fichas/03.md",
+    "markdownEn": "datos/fichas/03.en.md"
   },
   {
     "numero": 4,
     "titulo": "Cocina",
     "panorama": "panoramas/04.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
-    "markdown": "datos/fichas/04.md"
+    "markdown": "datos/fichas/04.md",
+    "markdownEn": "datos/fichas/04.en.md"
   },
   {
     "numero": 5,
     "titulo": "Habitación al lado de la cocina",
     "panorama": "panoramas/05.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
-    "markdown": "datos/fichas/05.md"
+    "markdown": "datos/fichas/05.md",
+    "markdownEn": "datos/fichas/05.en.md"
   },
   {
     "numero": 6,
     "titulo": "Escalera 1: ramal de acceso a la planta primera",
     "panorama": "panoramas/06.jpg",
     "planosDocumentales": {"A":"Dibujo de planta"},
-    "markdown": "datos/fichas/06.md"
+    "markdown": "datos/fichas/06.md",
+    "markdownEn": "datos/fichas/06.en.md"
   },
   {
     "numero": 7,
     "titulo": "Habitación este",
     "panorama": "panoramas/07.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
-    "markdown": "datos/fichas/07.md"
+    "markdown": "datos/fichas/07.md",
+    "markdownEn": "datos/fichas/07.en.md"
   },
   {
     "numero": 8,
     "titulo": "Sala",
     "panorama": "panoramas/08.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
-    "markdown": "datos/fichas/08.md"
+    "markdown": "datos/fichas/08.md",
+    "markdownEn": "datos/fichas/08.en.md"
   },
   {
     "numero": 9,
@@ -76,21 +85,24 @@ window.FICHAS = [
     "titulo": "Alcoba sureste",
     "panorama": "panoramas/10.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
-    "markdown": "datos/fichas/10.md"
+    "markdown": "datos/fichas/10.md",
+    "markdownEn": "datos/fichas/10.en.md"
   },
   {
     "numero": 11,
     "titulo": "Escalera 2: ramal de acceso a la falsa",
     "panorama": "panoramas/11.jpg",
     "planosDocumentales": {"A":"Dibujo de planta"},
-    "markdown": "datos/fichas/11.md"
+    "markdown": "datos/fichas/11.md",
+    "markdownEn": "datos/fichas/11.en.md"
   },
   {
     "numero": 12,
     "titulo": "Falsa",
     "panorama": "panoramas/12.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
-    "markdown": "datos/fichas/12.md"
+    "markdown": "datos/fichas/12.md",
+    "markdownEn": "datos/fichas/12.en.md"
   },
   {
     "numero": 13,
@@ -98,6 +110,7 @@ window.FICHAS = [
     "panorama": "panoramas/13.jpg",
     "planosDocumentales": {"A":"Dibujo de planta"},
     "markdown": "datos/fichas/13.md",
+    "markdownEn": "datos/fichas/13.en.md",
     "detalle": "carretera autonómica A-2101"
   },
   {
@@ -105,6 +118,7 @@ window.FICHAS = [
     "titulo": "Tejado",
     "panorama": "panoramas/14.jpg",
     "planosDocumentales": {"A":"Vista axonométrica del tejado","B":"Dibujo de la falsa y el tejado"},
-    "markdown": "datos/fichas/14.md"
+    "markdown": "datos/fichas/14.md",
+    "markdownEn": "datos/fichas/14.en.md"
   }
 ];
