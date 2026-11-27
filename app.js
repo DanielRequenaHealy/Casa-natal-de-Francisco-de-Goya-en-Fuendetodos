@@ -399,14 +399,36 @@
     }
     return null;
   }
-  async function loadPanorama(point) {
+  function fadePreviousView() {
+    var previous=document.createElement('canvas');
+    previous.className='panorama-fade';
+    previous.setAttribute('aria-hidden','true');
+    previous.width=canvas.width;
+    previous.height=canvas.height;
+    var context=previous.getContext('2d');
+    if (!context) return;
+    draw();
+    context.drawImage(canvas,0,0);
+    canvas.after(previous);
+    previous.addEventListener('animationend',function () { previous.remove(); },{once:true});
+  }
+  async function loadPanorama(point, onReady) {
     if(state.abort)state.abort.abort();state.abort=new AbortController();
-    state.request+=1;var current=state.request;state.yaw=0;state.pitch=0;state.fov=75;
-    updateMapHeading();
-    if(state.texture&&gl){gl.deleteTexture(state.texture);state.texture=null;}
+    state.request+=1;var current=state.request;
+    function resetView() {
+      state.yaw=0;state.pitch=0;state.fov=75;
+      updateMapHeading();
+      if(state.texture&&gl){gl.deleteTexture(state.texture);state.texture=null;}
+    }
+    if (!onReady) resetView();
+    loading.classList.toggle('panorama-loading-over-scene',Boolean(onReady));
     missing.hidden=true;loading.hidden=false;
     document.getElementById('missing-name').textContent=pointTitle(point);
-    function fail(message){if(current!==state.request)return;state.panoramaError=message;loading.hidden=true;missing.hidden=false;document.getElementById('missing-help').textContent=translate(message);}
+    function fail(message){
+      if(current!==state.request)return;
+      if (onReady) { onReady();resetView(); }
+      state.panoramaError=message;loading.hidden=true;missing.hidden=false;document.getElementById('missing-help').textContent=translate(message);
+    }
     if(!gl){fail('Este navegador no admite la visualización WebGL.');return;}
     if(!point.panorama){fail('Añade una ruta de imagen en datos/fichas.js.');return;}
     var bitmap=null,tex=null;
@@ -434,6 +456,11 @@
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
       gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+      if (onReady) {
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) fadePreviousView();
+        onReady();
+        resetView();
+      }
       state.texture=tex;tex=null;loading.hidden=true;missing.hidden=true;draw();
     }catch(e){
       fail(e.message==='Archivo no encontrado'?'No se encuentra '+point.panorama+'. Comprueba el nombre del archivo.':'Este dispositivo no pudo procesar la imagen original. Para esta vista hará falta una versión de menor tamaño.');
@@ -507,16 +534,34 @@
     var item=points[i];if(!item)return;
     var story=document.querySelector('.story');
     if(state.storyTimer){clearTimeout(state.storyTimer);state.storyTimer=null;}
+    document.querySelector('.panorama-fade')?.remove();
+    if (state.pendingFade) {
+      state.pendingFade=false;
+      state.request++;
+      state.abort.abort();
+      loading.hidden=true;
+    }
     story.classList.remove('story-leave','story-enter');
     state.index=i;
     document.querySelectorAll('.point').forEach(function(button,n){button.setAttribute('aria-current',n===i?'true':'false');});
     document.getElementById('mobile-points').value=String(item.numero);
     location.hash='p'+String(item.numero).padStart(2,'0');
-    function showNew(){
+    function showContent(){
       state.renderedIndex=i;
-      showCameraPlan(item);renderContent(item);loadPanorama(item);
+      showCameraPlan(item);renderContent(item);
     }
-    if(state.renderedIndex===undefined||state.renderedIndex===i||window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    function showNew(){ showContent();loadPanorama(item); }
+    var reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reducedMotion&&state.texture&&points[state.renderedIndex]?.numero===2&&item.numero===8) {
+      state.pendingFade=true;
+      loadPanorama(item,function () {
+        state.pendingFade=false;
+        showContent();
+        story.classList.add('story-enter');
+      });
+      return;
+    }
+    if(state.renderedIndex===undefined||state.renderedIndex===i||reducedMotion){
       if(state.renderedIndex!==i)showNew();
       return;
     }
