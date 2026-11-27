@@ -4,7 +4,8 @@ window.FICHAS = [
     "titulo": "La casa natal de Francisco de Goya y Lucientes",
     "panorama": "panoramas/00.jpg",
     "markdown": "datos/fichas/00.md",
-    "markdownEn": "datos/fichas/00.en.md"
+    "markdownEn": "datos/fichas/00.en.md",
+    "markdownFr": "datos/fichas/00.fr.md"
   },
   {
     "numero": 1,
@@ -12,7 +13,8 @@ window.FICHAS = [
     "panorama": "panoramas/01.jpg",
     "planosDocumentales": {"A":"Vista axonométrica de la fachada","B":"Alzado en blanco y negro","C":"Alzado en color","D":"Alzado de 1982"},
     "markdown": "datos/fichas/01.md",
-    "markdownEn": "datos/fichas/01.en.md"
+    "markdownEn": "datos/fichas/01.en.md",
+    "markdownFr": "datos/fichas/01.fr.md"
   },
   {
     "numero": 2,
@@ -20,7 +22,8 @@ window.FICHAS = [
     "panorama": "panoramas/02.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
     "markdown": "datos/fichas/02.md",
-    "markdownEn": "datos/fichas/02.en.md"
+    "markdownEn": "datos/fichas/02.en.md",
+    "markdownFr": "datos/fichas/02.fr.md"
   },
   {
     "numero": 3,
@@ -28,7 +31,8 @@ window.FICHAS = [
     "panorama": "panoramas/03.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
     "markdown": "datos/fichas/03.md",
-    "markdownEn": "datos/fichas/03.en.md"
+    "markdownEn": "datos/fichas/03.en.md",
+    "markdownFr": "datos/fichas/03.fr.md"
   },
   {
     "numero": 4,
@@ -36,7 +40,8 @@ window.FICHAS = [
     "panorama": "panoramas/04.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
     "markdown": "datos/fichas/04.md",
-    "markdownEn": "datos/fichas/04.en.md"
+    "markdownEn": "datos/fichas/04.en.md",
+    "markdownFr": "datos/fichas/04.fr.md"
   },
   {
     "numero": 5,
@@ -44,7 +49,8 @@ window.FICHAS = [
     "panorama": "panoramas/05.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
     "markdown": "datos/fichas/05.md",
-    "markdownEn": "datos/fichas/05.en.md"
+    "markdownEn": "datos/fichas/05.en.md",
+    "markdownFr": "datos/fichas/05.fr.md"
   },
   {
     "numero": 6,
@@ -52,7 +58,8 @@ window.FICHAS = [
     "panorama": "panoramas/06.jpg",
     "planosDocumentales": {"A":"Dibujo de planta"},
     "markdown": "datos/fichas/06.md",
-    "markdownEn": "datos/fichas/06.en.md"
+    "markdownEn": "datos/fichas/06.en.md",
+    "markdownFr": "datos/fichas/06.fr.md"
   },
   {
     "numero": 7,
@@ -60,7 +67,8 @@ window.FICHAS = [
     "panorama": "panoramas/07.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
     "markdown": "datos/fichas/07.md",
-    "markdownEn": "datos/fichas/07.en.md"
+    "markdownEn": "datos/fichas/07.en.md",
+    "markdownFr": "datos/fichas/07.fr.md"
   },
   {
     "numero": 8,
@@ -68,7 +76,8 @@ window.FICHAS = [
     "panorama": "panoramas/08.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
     "markdown": "datos/fichas/08.md",
-    "markdownEn": "datos/fichas/08.en.md"
+    "markdownEn": "datos/fichas/08.en.md",
+    "markdownFr": "datos/fichas/08.fr.md"
   },
   {
     "numero": 9,
@@ -76,6 +85,7 @@ window.FICHAS = [
     "panorama": "panoramas/09.jpg",
     "markdown": "datos/fichas/09.md",
     "markdownEn": "datos/fichas/09.en.md",
+    "markdownFr": "datos/fichas/09.fr.md",
     "planosDocumentales": {"A": "Planta axonométrica", "B": "Dibujo de planta"},
     "figuraConTexto": "7",
     "detalle": "habitación donde presuntamente nació Francisco de Goya y Lucientes"
@@ -86,7 +96,8 @@ window.FICHAS = [
     "panorama": "panoramas/10.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
     "markdown": "datos/fichas/10.md",
-    "markdownEn": "datos/fichas/10.en.md"
+    "markdownEn": "datos/fichas/10.en.md",
+    "markdownFr": "datos/fichas/10.fr.md"
   },
   {
     "numero": 11,
@@ -94,7 +105,8 @@ window.FICHAS = [
     "panorama": "panoramas/11.jpg",
     "planosDocumentales": {"A":"Dibujo de planta"},
     "markdown": "datos/fichas/11.md",
-    "markdownEn": "datos/fichas/11.en.md"
+    "markdownEn": "datos/fichas/11.en.md",
+    "markdownFr": "datos/fichas/11.fr.md"
   },
   {
     "numero": 12,
@@ -102,7 +114,8 @@ window.FICHAS = [
     "panorama": "panoramas/12.jpg",
     "planosDocumentales": {"A":"Planta axonométrica","B":"Dibujo de planta"},
     "markdown": "datos/fichas/12.md",
-    "markdownEn": "datos/fichas/12.en.md"
+    "markdownEn": "datos/fichas/12.en.md",
+    "markdownFr": "datos/fichas/12.fr.md"
   },
   {
     "numero": 13,
@@ -111,6 +124,7 @@ window.FICHAS = [
     "planosDocumentales": {"A":"Dibujo de planta"},
     "markdown": "datos/fichas/13.md",
     "markdownEn": "datos/fichas/13.en.md",
+    "markdownFr": "datos/fichas/13.fr.md",
     "detalle": "carretera autonómica A-2101"
   },
   {
@@ -119,6 +133,7 @@ window.FICHAS = [
     "panorama": "panoramas/14.jpg",
     "planosDocumentales": {"A":"Vista axonométrica del tejado","B":"Dibujo de la falsa y el tejado"},
     "markdown": "datos/fichas/14.md",
-    "markdownEn": "datos/fichas/14.en.md"
+    "markdownEn": "datos/fichas/14.en.md",
+    "markdownFr": "datos/fichas/14.fr.md"
   }
 ];

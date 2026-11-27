@@ -23,8 +23,31 @@
     'Añade una ruta de imagen en datos/fichas.js.':'No panorama has been configured.',
     'Este dispositivo no pudo procesar la imagen original. Para esta vista hará falta una versión de menor tamaño.':'This device could not process the original panorama. A smaller version is needed.'
   };
-  function translate(text) { return language==='en'?(english[text]??text):text; }
-  function pointTitle(point) { return language==='en'?(englishTitles[point.numero]??point.titulo):point.titulo; }
+  var frenchTitles=[
+    'Maison natale de Francisco de Goya y Lucientes','Façade ouest sur la calle Alfóndiga','Vestibule et garde-manger frais',
+    'Écurie','Cuisine','Pièce attenante à la cuisine','Escalier 1 : accès au premier étage','Pièce est','Salle principale',
+    'Alcôve sud-ouest','Alcôve sud-est','Escalier 2 : accès aux combles','Combles',
+    'Façade arrière est sur le paseo de Vista Alegre','Toiture'
+  ];
+  var french={
+    'Ámbitos':'Espaces','Exterior':'Extérieur','Interior':'Intérieur','Planta baja':'Rez-de-chaussée','Planta primera':'Premier étage','Falsa':'Combles',
+    'habitación donde presuntamente nació Francisco de Goya y Lucientes':'pièce où Francisco de Goya y Lucientes serait né',
+    'carretera autonómica A-2101':'route régionale A-2101',
+    'Nota al pie ':'Note de bas de page ','Notas al pie':'Notes de bas de page','Ampliar imagen':'Agrandir l’image','Ampliar ':'Agrandir : ',
+    'Cargando ficha documental…':'Chargement de la fiche documentaire…','No se ha podido cargar la ficha documental.':'Impossible de charger la fiche documentaire.',
+    'Planos y vistas':'Plans et vues','Planta axonométrica':'Vue axonométrique','Dibujo de planta':'Plan',
+    'Vista axonométrica de la fachada':'Vue axonométrique de la façade','Alzado en blanco y negro':'Élévation en noir et blanc',
+    'Alzado en color':'Élévation en couleur','Alzado de 1982':'Élévation de 1982',
+    'Vista axonométrica del tejado':'Vue axonométrique du toit','Dibujo de la falsa y el tejado':'Plan des combles et du toit',
+    'Imagen pendiente':'Image à venir','Plano de ubicación de la cámara ':'Plan de position de la caméra ',
+    'Este navegador no admite la visualización WebGL.':'Ce navigateur ne prend pas en charge WebGL.',
+    'Añade una ruta de imagen en datos/fichas.js.':'Aucun panorama n’est configuré.',
+    'Este dispositivo no pudo procesar la imagen original. Para esta vista hará falta una versión de menor tamaño.':'Cet appareil n’a pas pu traiter le panorama original. Une version plus petite est nécessaire.'
+  };
+  function translate(text) { return ({en:english,fr:french}[language]?.[text]??text); }
+  function pointTitle(point) { return ({en:englishTitles,fr:frenchTitles}[language]?.[point.numero]??point.titulo); }
+  function translatedMarkdown(point) { return {en:point.markdownEn,fr:point.markdownFr}[language]; }
+  function localized(es,en,fr) { return language==='fr'?fr:language==='en'?en:es; }
   var canvas = document.getElementById('panorama');
   var missing = document.getElementById('missing');
   var loading = document.getElementById('loading');
@@ -90,7 +113,7 @@
         node.appendChild(sup);
         return;
       }
-      var pointReference=/^\[(?:ver ámbito|see area) (\d{1,2})\]$/i.exec(chunk);
+      var pointReference=/^\[(?:ver ámbito|see area|voir espace) (\d{1,2})\]$/i.exec(chunk);
       var pointIndex=pointReference?points.findIndex(function (point) {
         return point.numero===Number(pointReference[1]);
       }): -1;
@@ -170,19 +193,24 @@
     enlargedPhoto.removeAttribute('src');
     photoOpener?.focus({preventScroll:true});
   });
-  function renderContent(point) {
-    var body=document.getElementById('story-body');body.replaceChildren();
+  function renderContent(point, keepReadingPosition) {
+    var body=document.getElementById('story-body');
+    var keepPosition=keepReadingPosition&&point.markdown&&body.firstElementChild?.classList.contains('markdown-story');
+    if (!keepPosition) body.replaceChildren();
     var storyTitle=document.getElementById('story-title');
-    var contentLanguage=language==='en'&&!point.markdownEn?'es':language;
+    var contentLanguage=translatedMarkdown(point)?language:'es';
     body.lang=storyTitle.lang=contentLanguage;
-    storyTitle.textContent=contentLanguage===language?pointTitle(point):point.titulo;
-    document.getElementById('story-language-note').hidden=contentLanguage===language;
+    if (!keepPosition) storyTitle.textContent=contentLanguage===language?pointTitle(point):point.titulo;
+    var languageNote=document.getElementById('story-language-note');
+    languageNote.lang=language;
+    languageNote.textContent=localized('', 'These exhibit notes are currently available in Spanish.', 'Cette fiche est actuellement disponible en espagnol.');
+    languageNote.hidden=contentLanguage===language;
     document.getElementById('point-number').textContent=String(point.numero).padStart(2,'0');
     document.getElementById('counter').textContent=String(point.numero).padStart(2,'0')+' / '+String(points.length-1).padStart(2,'0');
     document.getElementById('example-note').hidden=point.numero===9||Boolean(point.markdown);
     if (point.markdown) {
-      loadMarkdown(point, body, document.getElementById('story-title'));
-      document.querySelector('.story').scrollTop=0;
+      loadMarkdown(point, body, storyTitle, keepPosition);
+      if (!keepPosition) document.querySelector('.story').scrollTop=0;
       return;
     }
     (point.bloques||[]).forEach(function (block) {
@@ -197,15 +225,45 @@
     });
     document.querySelector('.story').scrollTop=0;
   }
-  async function loadMarkdown(point, body, title) {
+  function readingPosition(body) {
+    var story=body.closest('.story');
+    var scrollPanel=getComputedStyle(story).overflowY==='auto';
+    var viewportTop=scrollPanel?story.getBoundingClientRect().top:0;
+    var blocks=Array.from(body.querySelectorAll('.markdown-story :is(p,h3,blockquote,img,figcaption,li):not([hidden])'));
+    var index=-1;
+    var offset=0;
+    var fraction=0;
+    blocks.forEach(function (block,i) {
+      var rect=block.getBoundingClientRect();
+      if (!rect.height||rect.top>viewportTop) return;
+      index=i;
+      var distance=viewportTop-rect.top;
+      fraction=Math.min(1,distance/rect.height);
+      offset=distance-fraction*rect.height;
+    });
+    if (index<0) return;
+    return function () {
+      var block=body.querySelectorAll('.markdown-story :is(p,h3,blockquote,img,figcaption,li):not([hidden])')[index];
+      if (!block) return;
+      var rect=block.getBoundingClientRect();
+      var delta=rect.top+(fraction*rect.height)+offset-viewportTop;
+      if (scrollPanel) story.scrollTop+=delta;
+      else window.scrollBy(0,delta);
+    };
+  }
+  async function loadMarkdown(point, body, title, keepPosition) {
+    body.querySelector('.story-load-status')?.remove();
     var status=document.createElement('p');
+    status.className='story-load-status';
+    status.hidden=Boolean(keepPosition);
     status.textContent=translate('Cargando ficha documental…');
     body.appendChild(status);
     try {
-      var response=await fetch(language==='en'&&point.markdownEn?point.markdownEn:point.markdown);
+      var response=await fetch(translatedMarkdown(point)||point.markdown);
       if (!response.ok) throw Error(response.status);
       var markdown=await response.text();
       if (status.parentNode!==body) return;
+      var restorePosition=keepPosition&&readingPosition(body);
       var paragraphs=markdown.replace(/\r\n/g,'\n').trimEnd().split(/\n[ \t]*\n/);
       var headingText=paragraphs[0].startsWith('# ')?paragraphs.shift().slice(2):'';
       var content=document.createElement('article');
@@ -313,8 +371,10 @@
       });
       if (notes.childElementCount) content.appendChild(notes);
       body.replaceChildren(content);
+      if (restorePosition) restorePosition();
     } catch (error) {
       status.textContent=translate('No se ha podido cargar la ficha documental.');
+      status.hidden=false;
     }
   }
   async function imageDimensions(blob) {
@@ -563,49 +623,49 @@
   window.addEventListener('resize',function(){var current=Number(localStorage.getItem('goya-story-width'))||440;setStoryWidth(current,false);});
   var languageButtons=document.querySelectorAll('#visit-language button');
   var textLabels=[
-    ['.kicker','FUENDETODOS · VISITA VIRTUAL','FUENDETODOS · VIRTUAL TOUR'],
-    ['header h1','Casa natal de Goya','Goya’s birthplace'],
-    ['.mobile-select-label','Ámbito de la visita','Tour area'],
-    ['.rail-title','Ámbitos','Areas'],
-    ['#loading span:last-child','Cargando escena…','Loading scene…'],
-    ['#missing span','Panorámica pendiente','Panorama unavailable'],
-    ['.viewer-tip','Arrastra para mirar','Drag to look around'],
-    ['.wheel-tip',' · Rueda para ampliar',' · Scroll to zoom'],
-    ['.mobile-story-link','Ver ficha documental ','Read exhibit notes '],
-    ['.section-label','FICHA DOCUMENTAL ','EXHIBIT NOTES '],
-    ['#example-note','Contenido de muestra: reemplázalo con la ficha de este punto.','Sample content.'],
-    ['#photo-dialog form button','Cerrar ','Close '],
-    ['#photo-previous','← Anterior','← Previous'],
-    ['#photo-next','Siguiente →','Next →']
+    ['.kicker','FUENDETODOS · VISITA VIRTUAL','FUENDETODOS · VIRTUAL TOUR',"FUENDETODOS · VISITE VIRTUELLE"],
+    ['header h1','Casa natal de Goya','Goya’s birthplace',"Maison natale de Goya"],
+    ['.mobile-select-label','Ámbito de la visita','Tour area',"Espace de la visite"],
+    ['.rail-title','Ámbitos','Areas',"Espaces"],
+    ['#loading span:last-child','Cargando escena…','Loading scene…',"Chargement de la scène…"],
+    ['#missing span','Panorámica pendiente','Panorama unavailable',"Panorama indisponible"],
+    ['.viewer-tip','Arrastra para mirar','Drag to look around',"Faites glisser pour regarder autour de vous"],
+    ['.wheel-tip',' · Rueda para ampliar',' · Scroll to zoom'," · Molette pour zoomer"],
+    ['.mobile-story-link','Ver ficha documental ','Read exhibit notes ',"Lire la fiche documentaire "],
+    ['.section-label','FICHA DOCUMENTAL ','EXHIBIT NOTES ',"FICHE DOCUMENTAIRE "],
+    ['#example-note','Contenido de muestra: reemplázalo con la ficha de este punto.','Sample content.',"Exemple de contenu."],
+    ['#photo-dialog form button','Cerrar ','Close ',"Fermer "],
+    ['#photo-previous','← Anterior','← Previous',"← Précédente"],
+    ['#photo-next','Siguiente →','Next →',"Suivante →"]
   ];
   var attributeLabels=[
-    ['.rail','aria-label','Ámbitos de la visita','Tour areas'],
-    ['#mobile-points','aria-label','Seleccionar vista','Select a view'],
-    ['.viewer','aria-label','Panorámica de la estancia','Room panorama'],
-    ['#panorama','aria-label','Panorámica 360 grados; arrastra para mirar alrededor','360° panorama. Drag to look around'],
-    ['#panel-resizer','aria-label','Ajustar ancho de la ficha documental','Resize the exhibit notes panel'],
-    ['#panel-resizer','title','Arrastra para cambiar el ancho de la ficha','Drag to resize the exhibit notes panel'],
-    ['#story','aria-label','Ficha documental','Exhibit notes'],
-    ['#photo-dialog','aria-label','Visor de imágenes del ámbito','Image viewer'],
-    ['#visit-language','aria-label','Idioma','Language']
+    ['.rail','aria-label','Ámbitos de la visita','Tour areas',"Espaces de la visite"],
+    ['#mobile-points','aria-label','Seleccionar vista','Select a view',"Sélectionner une vue"],
+    ['.viewer','aria-label','Panorámica de la estancia','Room panorama',"Panorama de la pièce"],
+    ['#panorama','aria-label','Panorámica 360 grados; arrastra para mirar alrededor','360° panorama. Drag to look around',"Panorama à 360 degrés. Faites glisser pour regarder autour de vous"],
+    ['#panel-resizer','aria-label','Ajustar ancho de la ficha documental','Resize the exhibit notes panel',"Ajuster la largeur de la fiche documentaire"],
+    ['#panel-resizer','title','Arrastra para cambiar el ancho de la ficha','Drag to resize the exhibit notes panel',"Faites glisser pour modifier la largeur de la fiche"],
+    ['#story','aria-label','Ficha documental','Exhibit notes',"Fiche documentaire"],
+    ['#photo-dialog','aria-label','Visor de imágenes del ámbito','Image viewer',"Visionneuse d’images"],
+    ['#visit-language','aria-label','Idioma','Language',"Langue"]
   ];
   function applyLanguage(value) {
-    language=value==='en'?'en':'es';
+    language=value==='fr'||value==='en'?value:'es';
     document.documentElement.lang=language;
-    document.title=language==='en'?'Virtual tour · Goya’s birthplace':'Visita panorámica · Casa natal de Goya';
+    document.title=localized('Visita panorámica · Casa natal de Goya','Virtual tour · Goya’s birthplace','Visite virtuelle · Maison natale de Goya');
     languageButtons.forEach(function (button) {
       button.setAttribute('aria-pressed',String(button.value===language));
     });
-    textLabels.forEach(function ([selector,es,en]) {
-      document.querySelector(selector).firstChild.nodeValue=language==='en'?en:es;
+    textLabels.forEach(function ([selector,es,en,fr]) {
+      document.querySelector(selector).firstChild.nodeValue=localized(es,en,fr);
     });
-    attributeLabels.forEach(function ([selector,attribute,es,en]) {
-      document.querySelector(selector).setAttribute(attribute,language==='en'?en:es);
+    attributeLabels.forEach(function ([selector,attribute,es,en,fr]) {
+      document.querySelector(selector).setAttribute(attribute,localized(es,en,fr));
     });
     renderNavigation();
     if (state.renderedIndex!==undefined) {
       var point=points[state.renderedIndex];
-      renderContent(point);
+      renderContent(point,true);
       showCameraPlan(point);
       document.getElementById('missing-name').textContent=pointTitle(point);
       if (!missing.hidden) document.getElementById('missing-help').textContent=translate(state.panoramaError);
