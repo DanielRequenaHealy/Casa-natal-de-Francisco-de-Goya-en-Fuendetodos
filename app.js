@@ -399,6 +399,13 @@
     }
     return null;
   }
+  function panoramaTextureLimit() {
+    var compactScreen=Math.min(window.screen.width,window.screen.height)<768;
+    var touchScreen=window.matchMedia('(pointer: coarse)').matches||
+      (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    var preferredLimit=touchScreen?(compactScreen?4096:8192):16384;
+    return Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE),preferredLimit);
+  }
   async function loadPanorama(point) {
     if(state.abort)state.abort.abort();state.abort=new AbortController();
     state.request+=1;var current=state.request;state.yaw=0;state.pitch=0;state.fov=75;
@@ -414,8 +421,7 @@
       var response=await fetch(point.panorama,{signal:state.abort.signal});if(!response.ok)throw new Error('Archivo no encontrado');
       var blob=await response.blob();if(current!==state.request)return;
       var size=await imageDimensions(blob);
-      var mobile=window.matchMedia('(pointer: coarse)').matches||window.innerWidth<=760;
-      var limit=Math.min(gl.getParameter(gl.MAX_TEXTURE_SIZE),mobile?4096:Infinity);
+      var limit=panoramaTextureLimit();
       if(!Number.isFinite(limit)||limit<1)throw new Error('Límite de textura desconocido');
       if(!window.createImageBitmap)throw new Error('Este navegador no permite adaptar imágenes grandes');
       var options={imageOrientation:'flipY'};
