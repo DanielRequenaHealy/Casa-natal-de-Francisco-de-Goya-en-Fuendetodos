@@ -1,6 +1,30 @@
 (function () {
   'use strict';
   var points = window.FICHAS || [];
+  var language='es';
+  var englishTitles=[
+    'Birthplace of Francisco de Goya y Lucientes','West façade on Calle Alfóndiga','Entrance hall and cool store',
+    'Stable','Kitchen','Room beside the kitchen','Staircase 1: access to the first floor','East room','Main room',
+    'Southwest bedchamber','Southeast bedchamber','Staircase 2: access to the attic','Attic',
+    'Rear east façade on Paseo de Vista Alegre','Roof'
+  ];
+  var english={
+    'Ámbitos':'Areas','Exterior':'Exterior','Interior':'Interior','Planta baja':'Ground floor','Planta primera':'First floor','Falsa':'Attic',
+    'habitación donde presuntamente nació Francisco de Goya y Lucientes':'room where Francisco de Goya y Lucientes is believed to have been born',
+    'carretera autonómica A-2101':'regional road A-2101',
+    'Nota al pie ':'Footnote ','Notas al pie':'Footnotes','Ampliar imagen':'Enlarge image','Ampliar ':'Enlarge ',
+    'Cargando ficha documental…':'Loading exhibit notes…','No se ha podido cargar la ficha documental.':'Could not load the exhibit notes.',
+    'Planos y vistas':'Plans and drawings','Planta axonométrica':'Axonometric drawing','Dibujo de planta':'Floor plan',
+    'Vista axonométrica de la fachada':'Axonometric view of the façade','Alzado en blanco y negro':'Black-and-white elevation',
+    'Alzado en color':'Colour elevation','Alzado de 1982':'1982 elevation',
+    'Vista axonométrica del tejado':'Axonometric view of the roof','Dibujo de la falsa y el tejado':'Drawing of the attic and roof',
+    'Imagen pendiente':'Image pending','Plano de ubicación de la cámara ':'Camera location plan ',
+    'Este navegador no admite la visualización WebGL.':'This browser does not support WebGL.',
+    'Añade una ruta de imagen en datos/fichas.js.':'No panorama has been configured.',
+    'Este dispositivo no pudo procesar la imagen original. Para esta vista hará falta una versión de menor tamaño.':'This device could not process the original panorama. A smaller version is needed.'
+  };
+  function translate(text) { return language==='en'?(english[text]??text):text; }
+  function pointTitle(point) { return language==='en'?(englishTitles[point.numero]??point.titulo):point.titulo; }
   var canvas = document.getElementById('panorama');
   var missing = document.getElementById('missing');
   var loading = document.getElementById('loading');
@@ -61,7 +85,7 @@
       if (notePrefix&&note) {
         var sup=document.createElement('sup');
         var link=storyLink(note[1],notePrefix+note[1]);
-        link.setAttribute('aria-label','Nota al pie '+note[1]);
+        link.setAttribute('aria-label',translate('Nota al pie ')+note[1]);
         sup.appendChild(link);
         node.appendChild(sup);
         return;
@@ -125,7 +149,7 @@
     var button=document.createElement('button');
     button.type='button';
     button.className='enlarge-photo';
-    button.setAttribute('aria-label','Ampliar imagen'+(reference?' ['+reference+']':''));
+    button.setAttribute('aria-label',translate('Ampliar imagen')+(reference?' ['+reference+']':''));
     button.appendChild(photo);
     button.addEventListener('click',function () {
       photoItems=Array.from(document.querySelectorAll('#story-body .enlarge-photo'));
@@ -148,7 +172,11 @@
   });
   function renderContent(point) {
     var body=document.getElementById('story-body');body.replaceChildren();
-    document.getElementById('story-title').textContent=point.titulo;
+    var storyTitle=document.getElementById('story-title');
+    var contentLanguage=language==='en'&&!point.markdownEn?'es':language;
+    body.lang=storyTitle.lang=contentLanguage;
+    storyTitle.textContent=contentLanguage===language?pointTitle(point):point.titulo;
+    document.getElementById('story-language-note').hidden=contentLanguage===language;
     document.getElementById('point-number').textContent=String(point.numero).padStart(2,'0');
     document.getElementById('counter').textContent=String(point.numero).padStart(2,'0')+' / '+String(points.length-1).padStart(2,'0');
     document.getElementById('example-note').hidden=point.numero===9||Boolean(point.markdown);
@@ -162,7 +190,7 @@
       else if(block.tipo==='imagen') {
         var fig=document.createElement('figure');if(block.referencia){var ref=document.createElement('span');ref.className='figure-ref';ref.textContent='['+String(block.referencia).toUpperCase()+']';fig.appendChild(ref);}
         if(block.codigo){var code=document.createElement('div');code.className='file-ref';code.textContent='['+block.codigo+']';fig.appendChild(code);}
-        var visual=document.createElement('div');visual.className='photo';visual.textContent='Imagen pendiente · '+(block.codigo||'');
+        var visual=document.createElement('div');visual.className='photo';visual.textContent=translate('Imagen pendiente')+' · '+(block.codigo||'');
         if(block.url){var img=new Image();img.alt=block.pie||'Documento gráfico';img.loading='lazy';img.onload=function(){visual.replaceChildren(photoButton(img,block.referencia));};img.src=block.url;}
         fig.appendChild(visual);if(block.pie){var caption=document.createElement('figcaption');rich(caption,block.pie);fig.appendChild(caption);}body.appendChild(fig);
       }
@@ -171,10 +199,10 @@
   }
   async function loadMarkdown(point, body, title) {
     var status=document.createElement('p');
-    status.textContent='Cargando ficha documental…';
+    status.textContent=translate('Cargando ficha documental…');
     body.appendChild(status);
     try {
-      var response=await fetch(point.markdown);
+      var response=await fetch(language==='en'&&point.markdownEn?point.markdownEn:point.markdown);
       if (!response.ok) throw Error(response.status);
       var markdown=await response.text();
       if (status.parentNode!==body) return;
@@ -184,7 +212,7 @@
       content.className='markdown-story';
       var notes=document.createElement('ol');
       notes.className='story-footnotes';
-      notes.setAttribute('aria-label','Notas al pie');
+      notes.setAttribute('aria-label',translate('Notas al pie'));
       var notePrefix='ficha-'+point.numero+'-nota-';
       var figures=new Map();
       var images=paragraphs.map(function (paragraph) {
@@ -208,7 +236,7 @@
             var planSection=document.createElement('section');
             planSection.className='document-plans';
             var planTitle=document.createElement('h3');
-            planTitle.textContent='Planos y vistas';
+            planTitle.textContent=translate('Planos y vistas');
             planGrid=document.createElement('div');
             planGrid.className='document-plan-grid';
             planSection.append(planTitle,planGrid);
@@ -226,7 +254,7 @@
             });
             var planLabel=document.createElement('div');
             planLabel.className='document-plan-name';
-            planLabel.textContent=planName;
+            planLabel.textContent=translate(planName);
             figure.appendChild(planLabel);
           }
           figure.appendChild(label);
@@ -240,11 +268,11 @@
               photo.loading=paths.length>1?'eager':'lazy';
             } else {
               photo.className='photo';
-              photo.textContent='Imagen pendiente';
+              photo.textContent=translate('Imagen pendiente');
             }
             if (path) {
               var button=photoButton(photo,image[1]);
-              if (planName) button.setAttribute('aria-label','Ampliar '+planName.toLowerCase());
+              if (planName) button.setAttribute('aria-label',translate('Ampliar ')+translate(planName).toLowerCase());
               figure.appendChild(button);
             } else {
               figure.appendChild(photo);
@@ -286,7 +314,7 @@
       if (notes.childElementCount) content.appendChild(notes);
       body.replaceChildren(content);
     } catch (error) {
-      status.textContent='No se ha podido cargar la ficha documental.';
+      status.textContent=translate('No se ha podido cargar la ficha documental.');
     }
   }
   async function imageDimensions(blob) {
@@ -317,8 +345,8 @@
     updateMapHeading();
     if(state.texture&&gl){gl.deleteTexture(state.texture);state.texture=null;}
     missing.hidden=true;loading.hidden=false;
-    document.getElementById('missing-name').textContent=point.titulo;
-    function fail(message){if(current!==state.request)return;loading.hidden=true;missing.hidden=false;document.getElementById('missing-help').textContent=message;}
+    document.getElementById('missing-name').textContent=pointTitle(point);
+    function fail(message){if(current!==state.request)return;state.panoramaError=message;loading.hidden=true;missing.hidden=false;document.getElementById('missing-help').textContent=translate(message);}
     if(!gl){fail('Este navegador no admite la visualización WebGL.');return;}
     if(!point.panorama){fail('Añade una ruta de imagen en datos/fichas.js.');return;}
     var bitmap=null,tex=null;
@@ -355,7 +383,7 @@
     var path=point.planoCamara||'planos/'+String(point.numero).padStart(2,'0')+'_mapa.png';
     cameraPlan.hidden=true;
     var image=new Image();
-    image.alt='Plano de ubicación de la cámara '+String(point.numero).padStart(2,'0');
+    image.alt=translate('Plano de ubicación de la cámara ')+String(point.numero).padStart(2,'0');
     mapCone=null;
     cameraPlan.replaceChildren();cameraPlanImage=image;
     var currentFloor=mapFloors.find(function (floor) { return floor.rooms.includes(point.numero); });
@@ -378,7 +406,7 @@
           controls.appendChild(mapCone);
           updateMapHeading();
         }
-        var button=mapButton(target,points[target].titulo);
+        var button=mapButton(target,pointTitle(points[target]));
         button.className='map-room';
         button.style.left=coordinates[0]+'%';
         button.style.top=coordinates[1]+'%';
@@ -388,7 +416,7 @@
       mapFloors.forEach(function (floor) {
         var target=points.findIndex(function (room) { return room.numero===floor.arrival; });
         if (target<0) return;
-        var button=mapButton(target,floor.label);
+        var button=mapButton(target,translate(floor.label));
         button.className='map-floor';
         button.style.top=floor.top+'%';
         button.style.height=floor.height+'%';
@@ -451,21 +479,29 @@
     {from:13,to:14,area:'Exterior'}
   ];
   var mobile=document.getElementById('mobile-points');
-  groups.forEach(function(group){
+  function renderNavigation() {
+    list.replaceChildren();
+    mobile.replaceChildren();
+    groups.forEach(function(group){
     var section=document.createElement('section');section.className='point-group';
-    var options=document.createElement('optgroup');options.label=[group.roman,group.area,group.floor].filter(Boolean).join(' · ')||'Ámbitos';
-    if(group.area){var heading=document.createElement('h2');heading.className='group-heading';if(group.roman){var roman=document.createElement('span');roman.className='group-roman';roman.textContent=group.roman;heading.appendChild(roman);}heading.appendChild(document.createTextNode(group.area));section.appendChild(heading);}
-    if(group.floor){var floor=document.createElement('h3');floor.className='group-floor';floor.textContent=group.floor;section.appendChild(floor);}
+    var options=document.createElement('optgroup');options.label=[group.roman,group.area,group.floor].filter(Boolean).map(translate).join(' · ')||translate('Ámbitos');
+    if(group.area){var heading=document.createElement('h2');heading.className='group-heading';if(group.roman){var roman=document.createElement('span');roman.className='group-roman';roman.textContent=group.roman;heading.appendChild(roman);}heading.appendChild(document.createTextNode(translate(group.area)));section.appendChild(heading);}
+    if(group.floor){var floor=document.createElement('h3');floor.className='group-floor';floor.textContent=translate(group.floor);section.appendChild(floor);}
     points.forEach(function(point,i){
       if(point.numero<group.from||point.numero>group.to)return;
       var button=document.createElement('button');button.type='button';button.className='point';
       var number=document.createElement('b');number.textContent=String(point.numero);button.appendChild(number);
-      var copy=document.createElement('span');copy.className='point-copy';copy.textContent=point.titulo;
-      if(point.detalle){var detail=document.createElement('small');detail.className='point-detail';detail.textContent='['+point.detalle+']';copy.appendChild(detail);}
+      var copy=document.createElement('span');copy.className='point-copy';copy.textContent=pointTitle(point);
+      if(point.detalle){var detail=document.createElement('small');detail.className='point-detail';detail.textContent='['+translate(point.detalle)+']';copy.appendChild(detail);}
       button.appendChild(copy);button.onclick=function(){select(i);};section.appendChild(button);
-      var option=document.createElement('option');option.value=String(point.numero);option.textContent=point.numero+' · '+point.titulo;options.appendChild(option);
+      var option=document.createElement('option');option.value=String(point.numero);option.textContent=point.numero+' · '+pointTitle(point);options.appendChild(option);
     });list.appendChild(section);mobile.appendChild(options);
-  });
+    });
+    list.querySelectorAll('.point').forEach(function (button,i) {
+      button.setAttribute('aria-current',String(i===state.index));
+    });
+    mobile.value=String(points[state.index]?.numero??0);
+  }
   mobile.addEventListener('change',function(){var n=Number(mobile.value);var i=points.findIndex(function(point){return point.numero===n;});if(i>=0)select(i);});
   document.querySelector('.mobile-story-link').addEventListener('click',function(){
     document.getElementById('story').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
@@ -525,5 +561,55 @@
   function stopResize(){resizer.classList.remove('dragging');}resizer.addEventListener('pointerup',stopResize);resizer.addEventListener('pointercancel',stopResize);
   resizer.addEventListener('keydown',function(event){if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return;event.preventDefault();var width=parseFloat(getComputedStyle(workspace).getPropertyValue('--story-width'))||440;setStoryWidth(width+(event.key==='ArrowLeft'?20:-20),true);});
   window.addEventListener('resize',function(){var current=Number(localStorage.getItem('goya-story-width'))||440;setStoryWidth(current,false);});
+  var languagePicker=document.getElementById('visit-language');
+  var textLabels=[
+    ['.kicker','FUENDETODOS · VISITA VIRTUAL','FUENDETODOS · VIRTUAL TOUR'],
+    ['header h1','Casa natal de Goya','Goya’s birthplace'],
+    ['.mobile-select-label','Ámbito de la visita','Tour area'],
+    ['.rail-title','Ámbitos','Areas'],
+    ['#loading span:last-child','Cargando escena…','Loading scene…'],
+    ['#missing span','Panorámica pendiente','Panorama unavailable'],
+    ['.viewer-tip','Arrastra para mirar','Drag to look around'],
+    ['.wheel-tip',' · Rueda para ampliar',' · Scroll to zoom'],
+    ['.mobile-story-link','Ver ficha documental ','Read exhibit notes '],
+    ['.section-label','FICHA DOCUMENTAL ','EXHIBIT NOTES '],
+    ['#example-note','Contenido de muestra: reemplázalo con la ficha de este punto.','Sample content.'],
+    ['#photo-dialog form button','Cerrar ','Close '],
+    ['#photo-previous','← Anterior','← Previous'],
+    ['#photo-next','Siguiente →','Next →']
+  ];
+  var attributeLabels=[
+    ['.rail','aria-label','Ámbitos de la visita','Tour areas'],
+    ['#mobile-points','aria-label','Seleccionar vista','Select a view'],
+    ['.viewer','aria-label','Panorámica de la estancia','Room panorama'],
+    ['#panorama','aria-label','Panorámica 360 grados; arrastra para mirar alrededor','360° panorama. Drag to look around'],
+    ['#panel-resizer','aria-label','Ajustar ancho de la ficha documental','Resize the exhibit notes panel'],
+    ['#panel-resizer','title','Arrastra para cambiar el ancho de la ficha','Drag to resize the exhibit notes panel'],
+    ['#story','aria-label','Ficha documental','Exhibit notes'],
+    ['#photo-dialog','aria-label','Visor de imágenes del ámbito','Image viewer'],
+    ['#visit-language','aria-label','Idioma','Language']
+  ];
+  function applyLanguage(value) {
+    language=value==='en'?'en':'es';
+    document.documentElement.lang=language;
+    document.title=language==='en'?'Virtual tour · Goya’s birthplace':'Visita panorámica · Casa natal de Goya';
+    languagePicker.value=language;
+    textLabels.forEach(function ([selector,es,en]) {
+      document.querySelector(selector).firstChild.nodeValue=language==='en'?en:es;
+    });
+    attributeLabels.forEach(function ([selector,attribute,es,en]) {
+      document.querySelector(selector).setAttribute(attribute,language==='en'?en:es);
+    });
+    renderNavigation();
+    if (state.renderedIndex!==undefined) {
+      var point=points[state.renderedIndex];
+      renderContent(point);
+      showCameraPlan(point);
+      document.getElementById('missing-name').textContent=pointTitle(point);
+      if (!missing.hidden) document.getElementById('missing-help').textContent=translate(state.panoramaError);
+    }
+  }
+  languagePicker.addEventListener('change',function () { applyLanguage(languagePicker.value); });
+  applyLanguage('es');
   var matched=location.hash.match(/^#p(\d{1,2})$/);var number=matched?Number(matched[1]):0;var initialIndex=points.findIndex(function(point){return point.numero===number;});select(initialIndex>=0?initialIndex:0);
 })();
